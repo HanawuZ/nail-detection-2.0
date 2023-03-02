@@ -4,7 +4,7 @@ Implements program that execute multiprocesses consists of
 - When press button. Servo will start presssing nail and video start recording
   If servo is release, then wait for a certain before stop recording.
 - Plotting line graph of capillary after Servo was release
-
+d
 """
 import numpy as np
 import cv2
