@@ -20,7 +20,6 @@ def prompt_ok(event = 0):
  
 def saveAndExit(event = 0):
     global prevImg
- 
     if (len(sys.argv) < 2):
         filepath = "imageCap.png"
     else:
