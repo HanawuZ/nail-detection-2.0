@@ -71,8 +71,8 @@ except:
     camIndex = 0
  
 cap = cv2.VideoCapture(camIndex)
-capWidth = cap.get(3)
-capHeight = cap.get(4)
+# capWidth = cap.get(3)
+# capHeight = cap.get(4)
  
 success, frame = cap.read()
 if not success:
