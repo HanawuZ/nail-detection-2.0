@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 fileName = os.environ['ALLUSERSPROFILE'] + "\WebcamCap.txt"
 cancel = False
  
+# button to Screen
 def prompt_ok(event = 0):
     global cancel, button, button1, button2
     cancel = True
@@ -70,8 +71,8 @@ except:
     camIndex = 0
  
 cap = cv2.VideoCapture(camIndex)
-capWidth = cap.get(3)
-capHeight = cap.get(4)
+# capWidth = cap.get(3)
+# capHeight = cap.get(4)
  
 success, frame = cap.read()
 if not success:
@@ -109,7 +110,7 @@ def show_frame():
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
     if not cancel:
-        lmain.after(10, show_frame)
+        lmain.after(5, show_frame)
  
 show_frame()
 mainWindow.mainloop()
