@@ -16,8 +16,8 @@ class View(Tk):
         self.bind('<Escape>', lambda e: self.quit())
         self["background"] = "#161616"
 
-        # self.cap = cv2.VideoCapture(self.VIDEO_TEST_PATH) # Demo Video
-        self.cap = cv2.VideoCapture(0) # Webcam
+        self.cap = cv2.VideoCapture(self.VIDEO_TEST_PATH) # Demo Video
+        # self.cap = cv2.VideoCapture(0) # Webcam
         
         # self.mainWindows = T"k(screenName="New Windows")
         # self.mainWindows.geometry("800x600")
@@ -62,5 +62,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    print()
+    main()
+    # print()
