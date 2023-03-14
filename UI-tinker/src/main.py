@@ -6,7 +6,7 @@ class View(Tk):
     def __init__(self):
 
         # globel
-
+        self.recorder = False
 
         Tk.__init__(self, screenName="Testing")
         self.geometry("800x600")
@@ -36,7 +36,6 @@ class View(Tk):
             print("record")
 
         # will recursive fnctions
-        self.show_camera()
         
         
 
@@ -50,6 +49,7 @@ class View(Tk):
         self.camera.imgtk = imgTk
         self.camera.configure(image=imgTk)
         self.camera.after(5, self.record)
+        self.camera.after(5, self.show_camera)
 
 
 # *****************reading code satrt from this*****************
