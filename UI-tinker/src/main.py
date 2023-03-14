@@ -8,7 +8,7 @@ class View(Tk):
         # globel
         self.recorder = False
 
-        Tk.__init__(self, screenName="Testing")
+        Tk.__init__(self)
         self.geometry("800x600")
         # self.attributes("-fullscreen", True)
         self.bind('<Escape>', lambda e: self.quit())
