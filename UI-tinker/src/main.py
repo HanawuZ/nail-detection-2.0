@@ -50,8 +50,8 @@ class View(Tk):
         imgTk = ImageTk.PhotoImage(convImg)
         self.camera.imgtk = imgTk
         self.camera.configure(image=imgTk)
-        self.camera.after(5, self.record)
-        self.camera.after(5, self.show_camera)
+        self.camera.after(5, self.record) # will call function record when show_camera run after 5 ms
+        self.camera.after(5, self.show_camera) # will call recursive function whne pass to 5 ms
 
 
 # *****************reading code satrt from this*****************
