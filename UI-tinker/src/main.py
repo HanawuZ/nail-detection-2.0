@@ -1,10 +1,12 @@
 from tkinter import *
 import cv2
 from PIL import Image, ImageTk
+import pathlib
+import os
 
 class View(Tk):
     def __init__(self):
-
+        self.VIDEO_TEST_PATH = os.path.join(pathlib.Path(__file__).parent, "outpy.avi")
         # globel
         self.recorder = False
 
@@ -14,7 +16,7 @@ class View(Tk):
         self.bind('<Escape>', lambda e: self.quit())
         self["background"] = "#161616"
 
-        # self.cap = cv2.VideoCapture("D:/Nail-Research/nail-detection-2.0/UI-tinker/src/outpy.avi") # Demo Video
+        # self.cap = cv2.VideoCapture(self.VIDEO_TEST_PATH) # Demo Video
         self.cap = cv2.VideoCapture(0) # Webcam
         
         # self.mainWindows = T"k(screenName="New Windows")
@@ -60,4 +62,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    print()
