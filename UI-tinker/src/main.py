@@ -1,115 +1,66 @@
-import tkinter as tk
-import os
+from tkinter import *
 import cv2
-import sys
 from PIL import Image, ImageTk
- 
-fileName = os.environ['ALLUSERSPROFILE'] + "\WebcamCap.txt"
-cancel = False
- 
-def prompt_ok(event = 0):
-    global cancel, button, button1, button2
-    cancel = True
- 
-    button.place_forget()
-    button1 = tk.Button(mainWindow, text="Good Image!", command=saveAndExit)
-    button2 = tk.Button(mainWindow, text="Try Again", command=resume)
-    button1.place(anchor=tk.CENTER, relx=0.2, rely=0.9, width=150, height=50)
-    button2.place(anchor=tk.CENTER, relx=0.8, rely=0.9, width=150, height=50)
-    button1.focus()
- 
-def saveAndExit(event = 0):
-    global prevImg
-    if (len(sys.argv) < 2):
-        filepath = "imageCap.png"
-    else:
-        filepath = sys.argv[1]
- 
-    print ("Output file to: " + filepath)
-    prevImg.save(filepath)
-    mainWindow.quit()
- 
- 
-def resume(event = 0):
-    global button1, button2, button, lmain, cancel
- 
-    cancel = False
- 
-    button1.place_forget()
-    button2.place_forget()
- 
-    mainWindow.bind('<Return>', prompt_ok)
-    button.place(bordermode=tk.INSIDE, relx=0.5, rely=0.9, anchor=tk.CENTER, width=300, height=50)
-    lmain.after(10, show_frame)
- 
-def changeCam(event=0, nextCam=-1):
-    global camIndex, cap, fileName
- 
-    if nextCam == -1:
-        camIndex += 1
-    else:
-        camIndex = nextCam
-    del(cap)
-    cap = cv2.VideoCapture(camIndex)
- 
-    #try to get a frame, if it returns nothing
-    success, frame = cap.read()
-    if not success:
-        camIndex = 0
-        del(cap)
-        cap = cv2.VideoCapture(camIndex)
- 
-    f = open(fileName, 'w')
-    f.write(str(camIndex))
-    f.close()
- 
-try:
-    f = open(fileName, 'r')
-    camIndex = int(f.readline())
-except:
-    camIndex = 0
- 
-cap = cv2.VideoCapture(camIndex)
-capWidth = cap.get(3)
-capHeight = cap.get(4)
- 
-success, frame = cap.read()
-if not success:
-    if camIndex == 0:
-        print("Error, No webcam found!")
-        sys.exit(1)
-    else:
-        changeCam(nextCam=0)
-        success, frame = cap.read()
-        if not success:
-            print("Error, No webcam found!")
-            sys.exit(1)
- 
- 
-mainWindow = tk.Tk(screenName="Camera Capture")
-mainWindow.resizable(width=False, height=False)
-mainWindow.bind('<Escape>', lambda e: mainWindow.quit())
-lmain = tk.Label(mainWindow, compound=tk.CENTER, anchor=tk.CENTER, relief=tk.RAISED)
-button = tk.Button(mainWindow, text="Capture", command=prompt_ok)
-button_changeCam = tk.Button(mainWindow, text="Switch Camera", command=changeCam)
- 
-lmain.pack()
-button.place(bordermode=tk.INSIDE, relx=0.5, rely=0.9, anchor=tk.CENTER, width=300, height=50)
-button.focus()
-button_changeCam.place(bordermode=tk.INSIDE, relx=0.85, rely=0.1, anchor=tk.CENTER, width=150, height=50)
- 
-def show_frame():
-    global cancel, prevImg, button
- 
-    _, frame = cap.read()
-    cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
- 
-    prevImg = Image.fromarray(cv2image)
-    imgtk = ImageTk.PhotoImage(image=prevImg)
-    lmain.imgtk = imgtk
-    lmain.configure(image=imgtk)
-    if not cancel:
-        lmain.after(10, show_frame)
- 
-show_frame()
-mainWindow.mainloop()
+import pathlib
+import os
+
+class View(Tk):
+    def __init__(self):
+        self.VIDEO_TEST_PATH = os.path.join(pathlib.Path(__file__).parent, "outpy.avi")
+        # globel
+        self.recorder = False
+
+        Tk.__init__(self)
+        self.geometry("800x600")
+        # self.attributes("-fullscreen", True)
+        self.bind('<Escape>', lambda e: self.quit())
+        self["background"] = "#161616"
+
+        self.cap = cv2.VideoCapture(self.VIDEO_TEST_PATH) # Demo Video
+        # self.cap = cv2.VideoCapture(0) # Webcam
+        
+        # self.mainWindows = T"k(screenName="New Windows")
+        # self.mainWindows.geometry("800x600")
+
+        self.camera = Label(self, borderwidth=0)
+        self.camera.pack(padx=20, side=LEFT, anchor=CENTER)
+        self.button = Button(self, text="exit", command=self.startRecord, height=5, width=20)
+        self.button.pack(padx=20, side=RIGHT, anchor=CENTER)
+
+    # Change state of variable to start functions
+    def startRecord(self):
+        self.recorder = not self.recorder
+
+
+    # Function to records or start save data (example start servo and record camera)
+    def record(self):
+        if(self.recorder):
+            print("record")
+
+        # will recursive fnctions
+        
+        
+
+    def show_camera(self):
+        _, self.frame = self.cap.read()
+        cv2image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
+        convImg = Image.fromarray(cv2image)
+        convImg = convImg.resize((int(self.winfo_screenheight(
+        )*(4/3) - 100), int(self.winfo_screenheight() - 100)))  # Resize image from camera
+        imgTk = ImageTk.PhotoImage(convImg)
+        self.camera.imgtk = imgTk
+        self.camera.configure(image=imgTk)
+        self.camera.after(5, self.record) # will call function record when show_camera run after 5 ms
+        self.camera.after(5, self.show_camera) # will call recursive function whne pass to 5 ms
+
+
+# *****************reading code satrt from this*****************
+def main():
+    test = View()
+    test.show_camera()
+    test.mainloop()
+
+
+if __name__ == "__main__":
+    main()
+    # print()
