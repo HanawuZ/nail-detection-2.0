@@ -40,15 +40,14 @@ try:
     while True:
         sleep(0.1)
         servo.detach()
-        if(press_button.is_pressed):
-            sleep(0.1)
-            servo.value = Normalize(75)
-            sleep(0.5)
-            servo.detach()
-            sleep(5)
-            servo.min()
-            sleep(0.5)
-            servo.detach()
+        sleep(0.1)
+        servo.value = Normalize(75)
+        sleep(0.5)
+        servo.detach()
+        sleep(5)
+        servo.min()
+        sleep(0.5)
+        servo.detach()
         
 except KeyboardInterrupt:
     servo.min()
