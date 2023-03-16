@@ -28,7 +28,7 @@ class View(Tk):
         # self.cap = cv2.VideoCapture(self.VIDEO_TEST_PATH)  # Demo Video
         self.cap = cv2.VideoCapture(0) # Webcam
         # videocap = self.cap
-        # self.mainWindows = T"k(screenName="New Windows")
+        # self.mainWindows = Tk(screenName="New Windows")
         # self.mainWindows.geometry("800x600")
 
         self.camera = Label(self, borderwidth=0)
@@ -67,16 +67,16 @@ class View(Tk):
                 cv2.putText(cv2image,"Not running",(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),2,cv2.LINE_AA)
 
             convImg = Image.fromarray(cv2image)
-            convImg = convImg.resize(
-                (
-                    int(
-                        self.winfo_screenheight(
-                        )*(4/3) - 100),
-                    int(
-                        self.winfo_screenheight() - 100
-                    )
-                )
-            )  # Resize image from camera
+            # convImg = convImg.resize(
+            #     (
+            #         int(
+            #             self.winfo_screenheight(
+            #             )*(4/3) - 100),
+            #         int(
+            #             self.winfo_screenheight() - 100
+            #         )
+            #     )
+            # )  # Resize image from camera
             imgTk = ImageTk.PhotoImage(convImg)
             self.camera.imgtk = imgTk
             self.camera.configure(image=imgTk)
@@ -100,23 +100,24 @@ class Record(mp.Process):
     # Process start running this method when process is started
     def run(self):
         print("Run Record")
-        # self.record(self.cap)
         self.record()
 
     # Record video, destroy this object when press recording
     
     def record(self):
-        while(self.cap.isOpened()):
-            check,frame = self.cap.read()
-            if check == False:
-                break
-            else:
-                cv2.putText(frame,"Recording",(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2,cv2.LINE_AA)
-                self.video_recorder.write(frame)
+        # print("Test")
+        print(type(self.cap))
+        # while(self.cap.isOpened()):
+        #     check,frame = self.cap.read()
+        #     if check == False:
+        #         break
+        #     else:
+        #         # cv2.putText(frame,"Recording",(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2,cv2.LINE_AA)
+        #         self.video_recorder.write(frame)
                 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    print("Stop recording")
-                    break
+        #         if cv2.waitKey(1) & 0xFF == ord('q'):
+        #             print("Stop recording")
+        #             break
                 
 # ***************** reading code satrt from this *****************
 def main():

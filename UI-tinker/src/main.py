@@ -81,16 +81,16 @@ class View(Tk):
 
 # ***************** path to Multiprocessing (Recording) **********************
 class Record(mp.Process):
-    def __init__(self, cap):
+    def __init__(self, frame):
         mp.Process.__init__(self)
-        self.cap = cap
+        self.frame = frame
 
     def run(self):
         print("Run Record")
-        self.record(self.cap)
+        self.record(self.frame)
 
     def record(self, frame):
-        print(frame)
+        print(self.cap.isOpened())
 
 
 
