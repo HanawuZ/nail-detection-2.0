@@ -64,3 +64,4 @@ https://blog.devgenius.io/learn-ci-cd-with-github-actions-to-deploy-a-nestjs-app
 
 https://towardsdatascience.com/faster-video-processing-in-python-using-parallel-computing-25da1ad4a01
 
+https://stackoverflow.com/questions/70318766/tkinter-and-multiprocessing-cannot-pickle-tkinter-tkapp-object
