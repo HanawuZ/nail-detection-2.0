@@ -3,6 +3,8 @@ import cv2
 from PIL import Image, ImageTk
 import pathlib
 import os
+from gpiozero import Servo
+import time
 
 # multiprocessing
 import multiprocessing as mp
@@ -14,11 +16,15 @@ class View(Tk):
         
         # globel
         # global videocap
-        self.VIDEO_TEST_PATH = os.path.join(
-            pathlib.Path(__file__).parent, "outpy.avi")
+        self.VIDEO_TEST_PATH = os.path.join(pathlib.Path(__file__).parent, "outpy.avi")
         self.record_status = False
-
-
+        self.plotting_status = False
+        
+        self.servo = Servo(17)
+        self.servo.min()
+        time.sleep(0.5)
+        self.servo.detach()
+        
         Tk.__init__(self)
         self.geometry("1900x600")
         # self.attributes("-fullscreen", True)
@@ -35,7 +41,7 @@ class View(Tk):
         self.camera.pack(padx=20, side=LEFT, anchor=CENTER)
         self.button = Button(self, text="Record", command=self.startRecord, height=5, width=20)
         self.button.pack(padx=20, side=RIGHT, anchor=CENTER)
-
+        
         self.show_camera()
         # Show UI
         self.mainloop()
@@ -47,16 +53,25 @@ class View(Tk):
         # Create record process with attribute VideoCapture object
         if self.record_status == True:
             self.record = Record(cap=self.cap)
-        
+            self.servo_process = ServoProcess(servo=self.servo)
+            
+            
             # Start record process
             self.record.start()
+            self.servo_process.start()
         
         # Destroy record process object when stop recording
         else :
             self.record.terminate()
+            self.servo_process.terminate()
             del self.record
+            del self.servo_process
+            self.servo.min()
+            time.sleep(0.5)
+            self.servo.detach()
+        
 
-
+    
     def show_camera(self):
         ret, self.frame = self.cap.read()
         if(ret):
@@ -103,22 +118,35 @@ class Record(mp.Process):
         self.record()
 
     # Record video, destroy this object when press recording
-    
     def record(self):
-        # print("Test")
-        print(type(self.cap))
-        # while(self.cap.isOpened()):
-        #     check,frame = self.cap.read()
-        #     if check == False:
-        #         break
-        #     else:
-        #         # cv2.putText(frame,"Recording",(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2,cv2.LINE_AA)
-        #         self.video_recorder.write(frame)
+        while(self.cap.isOpened()):
+            check,frame = self.cap.read()
+            if check == False:
+                break
+            else:
+                cv2.putText(frame,"Recording",(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2,cv2.LINE_AA)
+                self.video_recorder.write(frame)
+                cv2.waitKey(1)
                 
-        #         if cv2.waitKey(1) & 0xFF == ord('q'):
-        #             print("Stop recording")
-        #             break
                 
+class ServoProcess(mp.Process):
+    def __init__(self, servo):
+        mp.Process.__init__(self)
+        self.servo = servo
+     
+    # Start press servo
+    def run(self):
+        self.pressServo()
+
+    def Normalize(self,deg):
+        return ((deg ) / (90)) * (1 - (-1)) + (-1)
+    
+    def pressServo(self):
+        time.sleep(1)
+        self.servo.value = self.Normalize(75)
+        time.sleep(0.5)
+        self.servo.detach()    
+    
 # ***************** reading code satrt from this *****************
 def main():
     # test = None
