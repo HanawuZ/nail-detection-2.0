@@ -228,8 +228,8 @@ termcolor==1.1.0
 terminado==0.12.1
 testpath==0.5.0
 thonny==3.3.10
-torch @ file:///home/pi/Desktop/Temp/torch-1.7.0a0-cp37-cp37m-linux_armv7l.whl
-torchvision @ file:///home/pi/Desktop/Temp/torchvision-0.8.0a0%2B45f960c-cp37-cp37m-linux_armv7l.whl
+torch 
+torchvision
 tornado==6.1
 touchphat==0.0.1
 tqdm==4.64.1
