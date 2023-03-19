@@ -5,7 +5,10 @@ import pathlib
 import os
 from gpiozero import Servo
 import time
-
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import matplotlib.animation as animation
+from random import randint
 # multiprocessing
 import multiprocessing as mp
 
@@ -13,7 +16,8 @@ import multiprocessing as mp
 
 class View(Tk):
     def __init__(self):
-        
+        Tk.__init__(self)
+
         # globel
         # global videocap
         self.VIDEO_TEST_PATH = os.path.join(pathlib.Path(__file__).parent, "outpy.avi")
@@ -25,7 +29,8 @@ class View(Tk):
         time.sleep(0.5)
         self.servo.detach()
         
-        Tk.__init__(self)
+        
+        
         self.geometry("1900x600")
         # self.attributes("-fullscreen", True)
         self.bind('<Escape>', lambda e: self.quit())
@@ -36,16 +41,35 @@ class View(Tk):
         # videocap = self.cap
         # self.mainWindows = Tk(screenName="New Windows")
         # self.mainWindows.geometry("800x600")
-
+        
         self.camera = Label(self, borderwidth=0)
         self.camera.pack(padx=20, side=LEFT, anchor=CENTER)
         self.button = Button(self, text="Record", command=self.startRecord, height=5, width=20)
         self.button.pack(padx=20, side=RIGHT, anchor=CENTER)
         
+        self.fig = Figure(figsize=(5, 4), dpi=100)
+        self.ax = self.fig.add_subplot(1, 1, 1)
+        self.x=[0]
+        self.y=[0]        
+        
+        # create a canvas to display the plot
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(side=RIGHT, anchor=CENTER)
+        
+        self.anim = animation.FuncAnimation(self.fig, self.animate, interval=1000)
+
         self.show_camera()
         # Show UI
         self.mainloop()
-
+    
+    def animate(self, i):
+        # update the data for the plot
+        self.x.append(i)
+        self.y.append(randint(25,200))
+        self.ax.clear()
+        self.ax.plot(self.x,self.y)
+  
     # Change state of variable to start functions
     def startRecord(self):
         self.record_status = not self.record_status
@@ -98,7 +122,7 @@ class View(Tk):
             # will call function record when show_camera run after 5 ms
             # self.camera.after(5, self.record)
             # will call recursive function whne pass to 5 ms
-            self.camera.after(5, self.show_camera)
+            self.camera.after(10, self.show_camera)
         else:
             self.cap.release()
             self.camera.destroy()
