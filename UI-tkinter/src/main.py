@@ -132,6 +132,7 @@ class View(Tk):
             self.lock.release()
 
             convImg = Image.fromarray(cv2image)
+            convImg = convImg.resize((480, 640))
             imgTk = ImageTk.PhotoImage(convImg)
             self.camera.imgtk = imgTk
             self.camera.configure(image=imgTk)
