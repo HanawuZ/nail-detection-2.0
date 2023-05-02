@@ -36,18 +36,24 @@ def Normalize(deg):
     return ((deg ) / (90)) * (1 - (-1)) + (-1)
 
 try:
-    servo.min()
+    i = 10
+    state = 0
     while True:
+        if(i == 10):
+            state = 0
+        elif(i == 75):
+            state = 1
+        if(state == 0):
+            i+=1
+        elif(state == 1):
+            i-=1
+        servo.value = Normalize(i)
+        print(i)
         sleep(0.1)
         servo.detach()
         sleep(0.1)
-        servo.value = Normalize(75)
-        sleep(0.5)
-        servo.detach()
-        sleep(5)
-        servo.min()
-        sleep(0.5)
-        servo.detach()
+        
+            
         
 except KeyboardInterrupt:
     servo.min()

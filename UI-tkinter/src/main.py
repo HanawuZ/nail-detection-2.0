@@ -12,10 +12,13 @@ from random import randint
 import numpy as np
 import multiprocessing as mp
 
+def Normalize(deg):
+        return ((deg ) / (90)) * (1 - (-1)) + (-1)
+
 class View(Tk):
     def __init__(self):
         Tk.__init__(self)
-        self.box_centroid = np.array([(180+450)//2 , (80+400)//2])
+        self.box_centroid = np.array([(400)//2 , (400)//2])
         self.bounding_box = np.array([[
             [self.box_centroid[0],self.box_centroid[1]],
             [450,self.box_centroid[1]],
@@ -27,7 +30,7 @@ class View(Tk):
         
         # Initialize Servo
         self.servo = Servo(17)
-        self.servo.min()
+        self.servo.value = Normalize(75)
         time.sleep(0.5)
         self.servo.detach()
         
@@ -47,6 +50,8 @@ class View(Tk):
         
         self.camera = Label(self, borderwidth=0)
         self.camera.pack(padx=20, side=LEFT, anchor=CENTER)
+        self.gray = Label(self, borderwidth=0)
+        self.gray.pack(side=RIGHT, anchor=CENTER)
         self.button = Button(self, text="Record", command=self.startRecord, height=5, width=20)
         self.button.pack(padx=20, side=RIGHT, anchor=CENTER)
         
@@ -81,7 +86,7 @@ class View(Tk):
     # Change state of variable to start functions
     def startRecord(self):
         self.record_status = not self.record_status
-        
+        print(self.record_status)
         # Create record process with attribute VideoCapture object
         if self.record_status == True:
             
@@ -100,7 +105,7 @@ class View(Tk):
             self.servo_process.terminate()
             del self.record
             del self.servo_process
-            self.servo.min()
+            self.servo.value = Normalize(75)
             time.sleep(0.5)
             self.servo.detach()
         
@@ -135,6 +140,12 @@ class View(Tk):
             convImg = convImg.resize((480, 640))
             imgTk = ImageTk.PhotoImage(convImg)
             self.camera.imgtk = imgTk
+            self.camera.configure(image=imgTk)
+            
+            convImg = Image.fromarray(gray_frame)
+            convImg = convImg.resize((480, 640))
+            imgTk = ImageTk.PhotoImage(convImg)
+            self.gray.imgtk = imgTk
             self.camera.configure(image=imgTk)
             
             # will call function record when show_camera run after 5 ms
@@ -185,7 +196,7 @@ class ServoProcess(mp.Process):
     
     def pressServo(self):
         time.sleep(1)
-        self.servo.value = self.Normalize(75)
+        self.servo.value = self.Normalize(15)
         time.sleep(0.5)
         self.servo.detach()    
     
