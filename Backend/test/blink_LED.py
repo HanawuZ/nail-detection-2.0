@@ -1,22 +1,35 @@
-import RPi.GPIO as GPIO
-import time
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-# Configure the PIN # 8
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(11, GPIO.OUT)
-GPIO.setwarnings(False)
+from gpiozero import Servo
+from time import sleep
 
-# Blink Interval 
-blink_interval = .5 #Time interval in Seconds
+servo = Servo(17)
 
-print("Start")
+app = FastAPI()
 
-# Blinker Loop
-while True:
-    GPIO.output(11, True)
-    time.sleep(blink_interval)
-    GPIO.output(11, False)
-    time.sleep(blink_interval)
+origins = ["*"]
 
-# Release Resources
-GPIO.cleanup()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+def hello_world() -> str:
+    print("Test")
+    servo.max()
+    sleep(1)
+    
+    return "Hello World"
+    
+servo.detach()
+
+if __name__ == "__main__":
+    import uvicorn
+    import os
+    port = int(os.environ.get("PORT", 8080)) # in this case will get a port in docker if it can be running in docker but if not will use port 8080 to running
+    uvicorn.run(app, host="0.0.0.0", port=port)
