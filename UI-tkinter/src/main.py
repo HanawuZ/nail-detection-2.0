@@ -41,45 +41,50 @@ class View(Tk):
         self.cap = cv2.VideoCapture(0)
         
         # Make UI fullscreen.
-        self.attributes("-fullscreen", True)
+        # self.attributes("-fullscreen", True)
+        # self.geometry("500x200")
         
         self.bind("<Escape>", lambda e: self.quit())
         
         # Set rgb background color "#C1C1C1"
         self["background"] = PRIMARY_COLOR
-
-        # Add camera
-        self.camera = Label(self, borderwidth=2, relief="solid")
-        self.camera.pack(padx=100, side=LEFT, anchor=CENTER)
         
-        self.col2 = Frame(self,width=1000,height=1000, background=PRIMARY_COLOR)
-        self.col2.pack(side=RIGHT, anchor=CENTER, padx=(50,50))
+        self.col1 = Frame(self,width=450,height=600, borderwidth=2, background=PRIMARY_COLOR, relief="solid")
+        self.col1.pack(side=LEFT, anchor=CENTER, padx=(100,0))
+        self.col1.grid_propagate(0)
+        
+        # Add camera
+        self.camera = Label(self.col1)
+        self.camera.grid(row=1,pady=(0,0), padx=(20,20))
+        
+        self.col2 = Frame(self,width=600,height=600, borderwidth=2, background=PRIMARY_COLOR, relief="solid")
+        self.col2.pack(side=LEFT, anchor=CENTER, padx=(0,0))
         self.col2.grid_propagate(0)
-
-        self.fig = Figure(figsize=(7, 7), dpi=100, facecolor=PRIMARY_COLOR)
+        
+        self.fig = Figure(figsize=(5, 4), dpi=100, facecolor=PRIMARY_COLOR)
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.set_xlabel("Time(s)")
     
-        self.graph_row = Label(self.col2, borderwidth=2, width=101, height=20, background=PRIMARY_COLOR)
-        self.graph_row.grid(row=1,pady=(40,40), padx=(5,5))
+        self.graph_row = Label(self.col2, borderwidth=2, width=50, height=20, background=PRIMARY_COLOR)
+        self.graph_row.grid(row=1,pady=(0,0), padx=(0,0))
         
         # create a canvas to display the plot
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.graph_row)
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(anchor=CENTER, padx=(100,100), fill=BOTH)
+        self.canvas.get_tk_widget().pack(anchor=CENTER, padx=(0,0), fill=BOTH)
         
-        myFont = font.Font(size=30)
-
+        
         self.button_row = Label(self.col2, background=PRIMARY_COLOR)
         self.button_row.grid(row=2)
         
         # Add button to UI
-        self.button = Button(self.button_row, text="Start",font=myFont, command=self.startRecord, width=10, height=2)
-        self.button.pack(padx=20, side=RIGHT, anchor=CENTER)
+        self.button = Button(self.button_row, text="Start", command=self.startRecord, width=10, height=2)
+        self.button.pack(padx=0, side=RIGHT, anchor=CENTER)
         
         self.anim = animation.FuncAnimation(self.fig, self.animate, interval=1000)
-        self.show_camera()
         
+        self.show_camera()
+
         # Show UI
         self.mainloop()
     
@@ -97,6 +102,7 @@ class View(Tk):
     # Change state of variable to start functions
     def startRecord(self):
         self.record_status = not self.record_status
+        """
         print(self.record_status)
         # Create record process with attribute VideoCapture object
         if self.record_status == True:
@@ -111,7 +117,7 @@ class View(Tk):
         else :
             self.record.terminate()
             del self.record
-
+        """
     def show_camera(self):
         ret, self.frame = self.cap.read()
         if(ret):
@@ -139,7 +145,7 @@ class View(Tk):
             self.lock.release()
 
             convImg = Image.fromarray(cv2image)
-            convImg = convImg.resize((700, 700))
+            convImg = convImg.resize((400, 400))
             imgTk = ImageTk.PhotoImage(convImg)
             self.camera.imgtk = imgTk
             self.camera.configure(image=imgTk)
@@ -147,7 +153,7 @@ class View(Tk):
             # will call function record when show_camera run after 2 ms
             # self.camera.after(2, self.record)
             # will call recursive function whne pass to 2 ms
-            self.camera.after(2, self.show_camera)
+            self.camera.after(5, self.show_camera)
         else:
             self.cap.release()
             self.camera.destroy()
