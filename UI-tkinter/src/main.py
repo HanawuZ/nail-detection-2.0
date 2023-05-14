@@ -12,8 +12,12 @@ import matplotlib.animation as animation
 style.use("ggplot")
 import numpy as np
 import multiprocessing as mp
+import asyncio
+import websockets
+import subprocess
 
 PRIMARY_COLOR = "#C1C1C1"
+# subprocess.run(["python"])
 
 def Normalize(deg):
     return ((deg ) / (90)) * (1 - (-1)) + (-1)
@@ -37,6 +41,8 @@ class View(Tk):
         # Create lock object for mutual exclusion lock
         self.lock = mp.Lock()
         
+        self.websocket = None
+
         # Setup camera
         self.cap = cv2.VideoCapture(0)
         
@@ -98,10 +104,22 @@ class View(Tk):
         self.ax.plot(xs,ys)
         self.lock.release()
         self.ax.set_ylim(0, 255)
-        
+    
+    async def connect(self):
+        self.websocket = await websockets.connect("ws://0.0.0.0:8080")
+    
+    async def pressServo(self):
+        await self.connect()
+        if self.record_status == True:
+            await self.websocket.send("1100")
+        else :
+            await self.websocket.send("1900")
+        await self.websocket.close()
+    
     # Change state of variable to start functions
     def startRecord(self):
         self.record_status = not self.record_status
+        asyncio.run(self.pressServo())
         """
         print(self.record_status)
         # Create record process with attribute VideoCapture object
@@ -182,26 +200,6 @@ class Record(mp.Process):
                 cv2.putText(frame,"Recording",(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2,cv2.LINE_AA)
                 self.video_recorder.write(frame)
                 cv2.waitKey(1)
-                
-"""               
-class ServoProcess(mp.Process):
-    def __init__(self, servo):
-        mp.Process.__init__(self)
-        self.servo = servo
-     
-    # Start press servo
-    def run(self):
-        self.pressServo()
-
-    def Normalize(self,deg):
-        return ((deg ) / (90)) * (1 - (-1)) + (-1)
-    
-    def pressServo(self):
-        time.sleep(1)
-        self.servo.value = self.Normalize(15)
-        time.sleep(0.5)
-        self.servo.detach()
-"""
 
 def main():
     test = View()
