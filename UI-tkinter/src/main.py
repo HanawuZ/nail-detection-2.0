@@ -1,4 +1,6 @@
-from tkinter import *
+import tkinter as tk
+import tkinter.font as font
+import ttkbootstrap as ttk
 import cv2
 from PIL import Image, ImageTk
 import pathlib
@@ -22,9 +24,9 @@ PRIMARY_COLOR = "#C1C1C1"
 def Normalize(deg):
     return ((deg ) / (90)) * (1 - (-1)) + (-1)
 
-class View(Tk):
+class View(tk.Tk):
     def __init__(self):
-        Tk.__init__(self)
+        tk.Tk.__init__(self)
         self.box_centroid = np.array([(400)//2 , (400)//2])
         self.bounding_box = np.array([[
             [self.box_centroid[0],self.box_centroid[1]],
@@ -47,50 +49,61 @@ class View(Tk):
         self.cap = cv2.VideoCapture(0)
         
         # Make UI fullscreen.
-        # self.attributes("-fullscreen", True)
+        self.attributes("-fullscreen", True)
         # self.geometry("500x200")
         
         self.bind("<Escape>", lambda e: self.quit())
         
         # Set rgb background color "#C1C1C1"
-        self["background"] = PRIMARY_COLOR
+        # self["background"] = PRIMARY_COLOR
         
-        self.col1 = Frame(self,width=450,height=600, borderwidth=2, background=PRIMARY_COLOR, relief="solid")
-        self.col1.pack(side=LEFT, anchor=CENTER, padx=(100,0))
+        self.style = ttk.Style()
+        self.style.configure(".", font=("Helvetica", 20))
+        
+        
+        self.col1 = tk.Frame(self,width=450,height=600)
+        self.col1.pack(side=tk.LEFT, anchor=tk.CENTER, padx=(0,0))
         self.col1.grid_propagate(0)
         
-        # Add camera
-        self.camera = Label(self.col1)
-        self.camera.grid(row=1,pady=(0,0), padx=(20,20))
+        self.camera_label = tk.Label(self.col1, text="Inference", font=("Helvetica", 18))
+        self.camera_label.grid(row=1)
         
-        self.col2 = Frame(self,width=600,height=600, borderwidth=2, background=PRIMARY_COLOR, relief="solid")
-        self.col2.pack(side=LEFT, anchor=CENTER, padx=(0,0))
+        # Add camera
+        self.camera = tk.Label(self.col1)
+        self.camera.grid(row=2,pady=(0,0), padx=(20,20))
+        
+        
+        self.col2 = tk.Frame(self,width=600,height=600, background=PRIMARY_COLOR)
+        self.col2.pack(side=tk.LEFT, anchor=tk.CENTER, padx=(0,0))
         self.col2.grid_propagate(0)
         
-        self.fig = Figure(figsize=(5, 4), dpi=100, facecolor=PRIMARY_COLOR)
+        self.fig = Figure(figsize=(5.5, 4), dpi=100, facecolor="#FFFFFF")
         self.ax = self.fig.add_subplot(1, 1, 1)
-        self.ax.set_xlabel("Time(s)")
     
-        self.graph_row = Label(self.col2, borderwidth=2, width=50, height=20, background=PRIMARY_COLOR)
+        self.graph_row = tk.Label(self.col2)
         self.graph_row.grid(row=1,pady=(0,0), padx=(0,0))
         
+        self.x_label = tk.Label(self.col2, text="Time(s)", font=("Helvetica", 18))
+        self.x_label.grid(row=2,pady=(0,20), padx=(0,0))
         # create a canvas to display the plot
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.graph_row)
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(anchor=CENTER, padx=(0,0), fill=BOTH)
-        
-        
-        self.button_row = Label(self.col2, background=PRIMARY_COLOR)
-        self.button_row.grid(row=2)
-        
-        # Add button to UI
-        self.button = Button(self.button_row, text="Start", command=self.startRecord, width=10, height=2)
-        self.button.pack(padx=0, side=RIGHT, anchor=CENTER)
+        self.canvas.get_tk_widget().pack(anchor=tk.CENTER, padx=(0,0), fill=tk.BOTH, pady=(0,20))
         
         self.anim = animation.FuncAnimation(self.fig, self.animate, interval=1000)
+
+        self.button_row = tk.Label(self.col2)
+        # self.button_row.config(bg=PRIMARY_COLOR)
+        self.button_row.grid(row=3)
+        
+        # Add button to UI
+        self.button = ttk.Button(self.button_row, text="Start",
+                                command=self.startRecord, width=12, bootstyle="outline")
+
+        self.button.pack(padx=0, pady=(20,0), side=tk.RIGHT, anchor=tk.CENTER, ipadx=20, ipady=20)
         
         self.show_camera()
-
+        
         # Show UI
         self.mainloop()
     
