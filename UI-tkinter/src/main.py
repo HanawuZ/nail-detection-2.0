@@ -29,10 +29,10 @@ class View(tk.Tk):
         tk.Tk.__init__(self)
         self.box_centroid = np.array([(400)//2 , (400)//2])
         self.bounding_box = np.array([[
-            [self.box_centroid[0],self.box_centroid[1]],
-            [450,self.box_centroid[1]],
-            [450,400-50],
-            [self.box_centroid[0],400-50]
+            [self.box_centroid[0]+150,self.box_centroid[1]+50],
+            [300,self.box_centroid[1]+50],
+            [300,400-180],
+            [self.box_centroid[0]+150,400-180]
         ]])
         
         # Initialize attribute value
@@ -90,7 +90,7 @@ class View(tk.Tk):
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(anchor=tk.CENTER, padx=(0,0), fill=tk.BOTH, pady=(0,20))
         
-        self.anim = animation.FuncAnimation(self.fig, self.animate, interval=1000)
+        self.anim = animation.FuncAnimation(self.fig, self.animate, interval=500)
 
         self.button_row = tk.Label(self.col2)
         # self.button_row.config(bg=PRIMARY_COLOR)
@@ -116,7 +116,7 @@ class View(tk.Tk):
         self.ax.clear()
         self.ax.plot(xs,ys)
         self.lock.release()
-        self.ax.set_ylim(0, 255)
+        self.ax.set_ylim(0, 2)
     
     async def connect(self):
         self.websocket = await websockets.connect("ws://0.0.0.0:8080")
@@ -124,7 +124,7 @@ class View(tk.Tk):
     async def pressServo(self):
         await self.connect()
         if self.record_status == True:
-            await self.websocket.send("1100")
+            await self.websocket.send("1000")
         else :
             await self.websocket.send("1900")
         await self.websocket.close()
@@ -155,8 +155,8 @@ class View(tk.Tk):
             cv2image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
             
             gray_frame = cv2.cvtColor(cv2image, cv2.COLOR_BGR2GRAY)
-            contrast_frame = cv2.convertScaleAbs(gray_frame, alpha=3.0, beta=-200)      
-
+            contrast_frame = cv2.convertScaleAbs(gray_frame, alpha=3.0, beta=-300)      
+            cv2image = contrast_frame
             in_roi_frame = contrast_frame[self.box_centroid[0]:401, self.box_centroid[1]:401]
             
             if self.record_status:
@@ -169,6 +169,11 @@ class View(tk.Tk):
             
             # Calculate average intensity of interesting nail area
             avg_intensity = np.mean(in_roi_frame)
+            
+            avg_intensity = (avg_intensity)/(255)
+            
+            avg_intensity = avg_intensity-0.15
+            avg_intensity = avg_intensity/0.1
             
             self.lock.acquire()
             self.x.append(self.x[-1]+1)
