@@ -17,9 +17,26 @@ import multiprocessing as mp
 import asyncio
 import websockets
 import subprocess
+import datetime
 
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
+
+_id = 1
+
+class Patient:
+    
+    def __int__(self):
+        pass
+    
+    def set_patient_data(self,patient_id):
+        global _id
+        self.patient_id = patient_id
+        self.date_time = datetime.datetime.now()
+        self.id = _id
+        _id+=1
+        
+        
 
 def Normalize(deg):
     return ((deg ) / (90)) * (1 - (-1)) + (-1)
@@ -35,6 +52,9 @@ class View(tk.Tk):
             [self.box_centroid[0]+150,400-180]
         ]])
         
+        # form variables
+        self.patient = Patient()
+        
         # Initialize attribute value
         self.record_status = False
         self.x=[0]
@@ -49,7 +69,7 @@ class View(tk.Tk):
         self.cap = cv2.VideoCapture(0)
         
         # Make UI fullscreen.
-        self.attributes("-fullscreen", True)
+        # self.attributes("-fullscreen", True)
         # self.geometry("500x200")
         
         self.bind("<Escape>", lambda e: self.quit())
@@ -61,11 +81,11 @@ class View(tk.Tk):
         self.style.configure(".", font=("Helvetica", 20))
         
         
-        self.col1 = tk.Frame(self,width=450,height=600)
+        self.col1 = tk.Frame(self,width=750,height=600,borderwidth=1, relief="solid")
         self.col1.pack(side=tk.LEFT, anchor=tk.CENTER, padx=(0,0))
         self.col1.grid_propagate(0)
         
-        self.camera_label = tk.Label(self.col1, text="Inference", font=("Helvetica", 18))
+        self.camera_label = tk.Label(self.col1, text="Inference", font=("Helvetica", 26))
         self.camera_label.grid(row=1)
         
         # Add camera
@@ -90,6 +110,22 @@ class View(tk.Tk):
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(anchor=tk.CENTER, padx=(0,0), fill=tk.BOTH, pady=(0,20))
         
+        self.col3 = tk.Frame(self,width=600,height=600,borderwidth=1, relief="solid")
+        self.col3.pack(side=tk.LEFT, anchor=tk.CENTER, padx=(0,0))
+        self.col3.grid_propagate(0)
+        
+        
+        self.patient_id_label = ttk.Label(master=self.col3, text="Patient ID", width=50,  font=("Helvetica", 18), borderwidth=1, relief="solid")
+        self.patient_id_label.grid(row=1,padx=5)
+        
+        self.patient_id_container = tk.Frame(master=self.col3, width=50, borderwidth=1, relief="solid")
+        self.patient_id_container.grid(row=2, padx=0, pady=5)
+        
+        self.ent = tk.Entry(master=self.patient_id_container)
+        self.ent.pack()
+        
+            
+        
         self.anim = animation.FuncAnimation(self.fig, self.animate, interval=500)
 
         self.button_row = tk.Label(self.col2)
@@ -99,6 +135,18 @@ class View(tk.Tk):
         # Add button to UI
         self.button = ttk.Button(self.button_row, text="Start",
                                 command=self.startRecord, width=12, bootstyle="outline")
+        
+        self.show_text_btn = ttk.Button(self.col3, text="Show Text", command=self.show_text)
+        self.show_text_btn.grid(row=3)
+        
+        self.show_text = tk.Label(self.col3)
+        self.show_text.grid(row=4)
+        
+        self.show_date = tk.Label(self.col3)
+        self.show_date.grid(row=5)
+        
+        self.show_id = tk.Label(self.col3)
+        self.show_id.grid(row=6)
 
         self.button.pack(padx=0, pady=(20,0), side=tk.RIGHT, anchor=tk.CENTER, ipadx=20, ipady=20)
         
@@ -106,7 +154,14 @@ class View(tk.Tk):
         
         # Show UI
         self.mainloop()
-    
+
+    def show_text(self):
+        patient_id = self.ent.get()  # Get the text from the Entry widget
+        self.patient.set_patient_data(patient_id)
+        self.show_text.config(text=self.patient.patient_id)  # Set the text of the Label widget
+        self.show_date.config(text=self.patient.date_time)  # Set the text of the Label widget
+        self.show_id.config(text=self.patient.id)  # Set the text of the Label widget
+
     def animate(self, i):
         # update the data for the plot
         self.lock.acquire()
@@ -156,7 +211,7 @@ class View(tk.Tk):
             
             gray_frame = cv2.cvtColor(cv2image, cv2.COLOR_BGR2GRAY)
             contrast_frame = cv2.convertScaleAbs(gray_frame, alpha=3.0, beta=-300)      
-            cv2image = contrast_frame
+            #cv2image = contrast_frame
             in_roi_frame = contrast_frame[self.box_centroid[0]:401, self.box_centroid[1]:401]
             
             if self.record_status:
@@ -181,7 +236,7 @@ class View(tk.Tk):
             self.lock.release()
 
             convImg = Image.fromarray(cv2image)
-            convImg = convImg.resize((400, 400))
+            convImg = convImg.resize((700, 700))
             imgTk = ImageTk.PhotoImage(convImg)
             self.camera.imgtk = imgTk
             self.camera.configure(image=imgTk)
