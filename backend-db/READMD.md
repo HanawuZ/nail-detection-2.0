@@ -8,13 +8,15 @@
 
 3. if you need to init a new project you can create new folder and use `go mod init github.com/[GithubName]/[GithubProjectName]`
 
-4. from 3. in link is mean github url of your project
+4. if you want a continue form this code can use `go mod tidy` to install all module
 
-5. create `main.go` file and you can run everything on this file 
+5. from 3. in link is mean github url of your project
 
-6. if you want to install some module - can use `go get -u [module-name]`
+6. create `main.go` file and you can run everything on this file 
 
-7. let's fun with golang
+7. if you want to install some module - can use `go get -u [module-name]`
+
+8. let's fun with golang
 
 ## if you want to run a database mongo on local you need to read this
 
