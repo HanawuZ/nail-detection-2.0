@@ -14,28 +14,16 @@ import asyncio
 import websockets
 import datetime
 from pages.create_patient import CreatePatient
-
+from models.Patient import Patient
 style.use("ggplot")
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
 
-_id = 1
-
-class Patient:
-    
-    def __int__(self):
-        pass
-    
-    def set_patient_data(self,patient_id):
-        global _id
-        self.patient_id = patient_id
-        self.date_time = datetime.datetime.now()
-        self.id = _id
-        _id+=1
 
 class CameraAndGraph(tk.Frame):
-    def __init__(self, parent, controller, create_patient_page):
+    def __init__(self, parent, controller, create_patient_page,patient):
         tk.Frame.__init__(self, parent)
+
 		
 		# # label of frame Layout 2
         # label = ttk.Label(self, text ="Startpage",)
@@ -63,7 +51,7 @@ class CameraAndGraph(tk.Frame):
         # Initialize attribute value
         # Define record status to determine that device is recording or not, default value is False
         self.record_status = False
-
+        self.patient = patient
         # Define 2 arrays
         # x is int array to store frame values
         # y float array to store intensity of nail
@@ -72,7 +60,7 @@ class CameraAndGraph(tk.Frame):
         
         # Create lock instance for mutual exclusion lock
         self.lock = mp.Lock()
-        
+            
         # Create websocket instance for websocket connection
         self.websocket = None
 
@@ -98,6 +86,28 @@ class CameraAndGraph(tk.Frame):
         self.camera = tk.Label(camera_col)
         self.camera.grid(row=2,pady=(0,0), padx=(20,20))
 
+        patient_data_container = tk.Frame(camera_col, borderwidth=1, relief="solid")
+        patient_data_container.grid(row=3, )
+
+        
+        patient_id_label = ttk.Label(patient_data_container, text="รหัสผู้ป่วย", font=("Helvetica", 18))
+        patient_id_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
+
+        patient_id_value = ttk.Label(patient_data_container, text=self.patient.patient_id,font=("Helvetica", 18) )
+        patient_id_value.grid(column=1, row=0, sticky=tk.E, padx=5, pady=5)
+
+        firstname_label = ttk.Label(patient_data_container, text="ชื่อ", font=("Helvetica", 18))
+        firstname_label.grid(column=0, row=1, sticky=tk.W, padx=5, pady=5)
+
+        firstname_value = ttk.Label(patient_data_container,  text=self.patient.first_name, font=("Helvetica", 18))
+        firstname_value.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
+
+        firstname_label = ttk.Label(patient_data_container, text="นามสกุล", font=("Helvetica", 18))
+        firstname_label.grid(column=0, row=2, sticky=tk.W, padx=5, pady=5)
+
+        firstname_value = ttk.Label(patient_data_container,  text=self.patient.first_name,font=("Helvetica", 18))
+        firstname_value.grid(column=1, row=2, sticky=tk.E, padx=5, pady=5)
+        
         ########## These're component for graph and button section ####################
         # Define second column for display graph and button
         col2 = tk.Frame(self,width=630,height=720)

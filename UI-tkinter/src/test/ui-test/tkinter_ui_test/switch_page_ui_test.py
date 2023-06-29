@@ -9,6 +9,7 @@ class tkinterApp(tk.Tk):
 	# __init__ function for class tkinterApp
 	def __init__(self, *args, **kwargs):
 		
+		self.data = "test"
 		# __init__ function for class Tk
 		tk.Tk.__init__(self, *args, **kwargs)
 		
@@ -26,7 +27,7 @@ class tkinterApp(tk.Tk):
 		# of the different page layouts
 		for F in (StartPage, Page1, Page2):
 
-			frame = F(container, self)
+			frame = F(container, self, self.data)
 
 			# initializing frame of that object from
 			# startpage, page1, page2 respectively with
@@ -46,7 +47,7 @@ class tkinterApp(tk.Tk):
 # first window frame startpage
 
 class StartPage(tk.Frame):
-	def __init__(self, parent, controller):
+	def __init__(self, parent, controller, data):
 		tk.Frame.__init__(self, parent)
 		
 		# label of frame Layout 2
@@ -71,13 +72,18 @@ class StartPage(tk.Frame):
 		# using grid
 		button2.grid(row = 2, column = 1, padx = 10, pady = 10)
 
+		self.label = tk.Label(self, text="Data:")
+		self.label.grid()
+		self.data_label = tk.Label(self, text=data)
+		self.data_label.grid()
+
 		
 
 
 # second window frame page1
 class Page1(tk.Frame):
 	
-	def __init__(self, parent, controller):
+	def __init__(self, parent, controller, data):
 		
 		tk.Frame.__init__(self, parent)
 		label = ttk.Label(self, text ="Page 1", font = LARGEFONT)
@@ -100,13 +106,13 @@ class Page1(tk.Frame):
 		# putting the button in its place by
 		# using grid
 		button2.grid(row = 2, column = 1, padx = 10, pady = 10)
-
-
-
-
+		
+		self.save_button = tk.Button(self, text="Save", command=self.save_data)
+		self.save_button.pack()
+	
 # third window frame page2
 class Page2(tk.Frame):
-	def __init__(self, parent, controller):
+	def __init__(self, parent, controller, data):
 		tk.Frame.__init__(self, parent)
 		label = ttk.Label(self, text ="Page 2", font = LARGEFONT)
 		label.grid(row = 0, column = 4, padx = 10, pady = 10)

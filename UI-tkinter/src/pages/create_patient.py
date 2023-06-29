@@ -2,10 +2,12 @@ import tkinter as tk
 import ttkbootstrap as ttk
 # from pages.camera_and_graph import CameraAndGraph
 class CreatePatient(tk.Frame):
-    def __init__(self, parent, controller, camera_and_graph):
+    def __init__(self, parent, controller, camera_and_graph, patient):
         tk.Frame.__init__(self, parent)
         self.bind("<Escape>", lambda e: self.quit())
 
+        self.patient = patient
+        self.camera_and_graph = camera_and_graph
         container = tk.Frame(self, borderwidth=1, relief="solid")
         container.pack(side = "top", fill = "y", expand = True, padx=30, pady=30)
 
@@ -33,20 +35,20 @@ class CreatePatient(tk.Frame):
         patient_id_label.pack(anchor="w", padx=(0,0))
         
 
-        patient_id_entry = ttk.Entry(patient_id_frame, bootstyle="primary", font=("Helvetica", 16), width=55)
-        patient_id_entry.pack(anchor="w", padx=(20,0), ipady=5)
-   
+        self.patient_id_entry = ttk.Entry(patient_id_frame, bootstyle="primary", font=("Helvetica", 16), width=55)
+        self.patient_id_entry.pack(anchor="w", padx=(20,0), ipady=5)
 
 
 
         firstname_frame = tk.Frame(container,borderwidth=1, relief="solid")
         firstname_frame.pack(anchor="w", padx=(0,0), fill="x")
 
+
         firstname_label = tk.Label(firstname_frame, text="ชื่อ", font=("Helvetica", 18))
         firstname_label.pack(anchor="w", padx=(15,0))
 
-        firstname_entry = ttk.Entry(firstname_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
-        firstname_entry.pack(anchor="w", padx=(20,0), ipady=5)
+        self.firstname_entry = ttk.Entry(firstname_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
+        self.firstname_entry.pack(anchor="w", padx=(20,0), ipady=5)
 
         lastname_frame = tk.Frame(container,borderwidth=1, relief="solid")
         lastname_frame.pack(anchor="w", padx=(15,0), fill="x")
@@ -54,8 +56,8 @@ class CreatePatient(tk.Frame):
         lastname_label = tk.Label(firstname_frame, text="นามสกุล", font=("Helvetica", 18))
         lastname_label.pack(anchor="w", padx=(15,0))
 
-        lastname_entry = ttk.Entry(firstname_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
-        lastname_entry.pack(anchor="w", padx=(20,0), ipady=5)
+        self.lastname_entry = ttk.Entry(firstname_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
+        self.lastname_entry.pack(anchor="w", padx=(20,0), ipady=5)
 
         # Add label and textfield for Patient_ID
         datetime_frame = tk.Frame(container,borderwidth=1, relief="solid")
@@ -67,6 +69,7 @@ class CreatePatient(tk.Frame):
 
         datetime_entry = ttk.Entry(datetime_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
         datetime_entry.pack(anchor="w", padx=(20,0), ipady=5)
+
 
         buttons_row = tk.Frame(container,borderwidth=1, relief="solid")
         buttons_row.pack()
@@ -90,9 +93,17 @@ class CreatePatient(tk.Frame):
 
         back_button = ttk.Button(back_btn_frame, 
                                  bootstyle="success",
-                                 text="Save", )
+                                 text="Save", 
+                                 command=self.add_patient_data
+                                 )
     
         back_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER, relheight=0.75,  relwidth=0.75)
+    
+    def add_patient_data(self):
+        patient_id = self.patient_id_entry.get()
+        firstname = self.firstname_entry.get()
+        lastname = self.lastname_entry.get()
+
 
 if __name__ == "__main__":
     create_patient = CreatePatient()

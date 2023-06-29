@@ -1,13 +1,15 @@
 import tkinter as tk
 from pages.camera_and_graph import CameraAndGraph
 from pages.create_patient import CreatePatient
-
+from models.Patient import Patient
 
 class App(tk.Tk):
 	
 	# __init__ function for class tkinterApp
 	def __init__(self, *args, **kwargs):
 		
+		self.patient = Patient("HN123456789", "John", "Doe")
+
 		# __init__ function for class Tk
 		tk.Tk.__init__(self, *args, **kwargs)
 		self.geometry("1280x720")
@@ -22,11 +24,11 @@ class App(tk.Tk):
 		# initializing frames to an empty array
 		self.frames = {}
 		
-		camera_and_graph = CameraAndGraph(container, self, CreatePatient)
+		camera_and_graph = CameraAndGraph(container, self, CreatePatient,self.patient)
 		self.frames[CameraAndGraph] = camera_and_graph
 		camera_and_graph.grid(row = 0, column = 0, sticky ="nsew")
 		
-		create_patient = CreatePatient(container, self, CameraAndGraph)
+		create_patient = CreatePatient(container, self, CameraAndGraph,self.patient)
 		self.frames[CreatePatient] = create_patient
 		create_patient.grid(row = 0, column = 0, sticky ="nsew")
 
