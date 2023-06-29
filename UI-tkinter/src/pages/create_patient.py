@@ -82,7 +82,7 @@ class CreatePatient(tk.Frame):
 
         back_button = ttk.Button(back_btn_frame, 
                                  bootstyle="danger-outline",
-                                 text="Back", 
+                                 text="ย้อนกลับ", 
                                  command = lambda : controller.show_frame(camera_and_graph),
                                  )
     
@@ -93,9 +93,7 @@ class CreatePatient(tk.Frame):
 
         back_button = ttk.Button(back_btn_frame, 
                                  bootstyle="success",
-                                 text="Save", 
-                                 command=self.add_patient_data
-                                 )
+                                 text="บันทึก", )
     
         back_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER, relheight=0.75,  relwidth=0.75)
     
