@@ -79,3 +79,5 @@ https://towardsdatascience.com/faster-video-processing-in-python-using-parallel-
 https://stackoverflow.com/questions/70318766/tkinter-and-multiprocessing-cannot-pickle-tkinter-tkapp-object
 ## ref for everyone to use in your project and working
 https://blog.devgenius.io/learn-ci-cd-with-github-actions-to-deploy-a-nestjs-app-to-heroku-8feb715d3ce7
+
+https://thiti.dev/tags/go/
