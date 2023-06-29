@@ -14,6 +14,7 @@ class App(tk.Tk):
 		# __init__ function for class Tk
 		tk.Tk.__init__(self, *args, **kwargs)
 		self.geometry("1280x720")
+		#self.attributes('-fullscreen', True)
         
 		# creating a container
 		container = tk.Frame(self)
@@ -50,7 +51,6 @@ class App(tk.Tk):
 			if str(page.__class__.__name__) == classname:
 				return page
 		return None
-
 
 # first window frame startpage
 
