@@ -165,9 +165,10 @@ class CameraAndGraph(tk.Frame):
         self.lastname_value.configure(text=self.patient.last_name)
 
     def navigate_to_create_patient(self):
-        create_patient_page = self.controller.get_page("CreatePatient").__class__
-        self.controller.show_frame(create_patient_page)
-
+        create_patient_page = self.controller.get_page("CreatePatient")
+        create_patient_page.use_effect()
+        self.controller.show_frame(create_patient_page.__class__)
+        
     def animate(self, i):
         # update the data for the plot
         self.lock.acquire()

@@ -3,6 +3,25 @@ import ttkbootstrap as ttk
 # from pages.camera_and_graph import CameraAndGraph
 
 class CreatePatient(tk.Frame):
+
+    def add_patient_data(self):
+        patient_id = self.patient_id_entry.get()
+        first_name = self.firstname_entry.get()
+        last_name = self.lastname_entry.get()
+
+        self.controller.patient.set_patient_data(patient_id, first_name, last_name)
+        camera_and_graph = self.controller.get_page("CameraAndGraph")
+        camera_and_graph.patient_data_on_change()
+
+    def navigate_to_camera_and_graph(self):
+        camera_and_graph = self.controller.get_page("CameraAndGraph").__class__
+        self.controller.show_frame(camera_and_graph)
+
+    def use_effect(self):
+        self.patient_id_entry.delete(0,tk.END)
+        self.firstname_entry.delete(0,tk.END)
+        self.lastname_entry.delete(0,tk.END)
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.bind("<Escape>", lambda e: self.quit())
@@ -99,19 +118,6 @@ class CreatePatient(tk.Frame):
                                  )
     
         back_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER, relheight=0.75,  relwidth=0.75)
-    
-    def add_patient_data(self):
-        patient_id = self.patient_id_entry.get()
-        first_name = self.firstname_entry.get()
-        last_name = self.lastname_entry.get()
-
-        self.controller.patient.set_patient_data(patient_id, first_name, last_name)
-        camera_and_graph = self.controller.get_page("CameraAndGraph")
-        camera_and_graph.patient_data_on_change()
-
-    def navigate_to_camera_and_graph(self):
-        camera_and_graph = self.controller.get_page("CameraAndGraph").__class__
-        self.controller.show_frame(camera_and_graph)
 
 
 if __name__ == "__main__":
