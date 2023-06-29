@@ -12,26 +12,23 @@ import numpy as np
 import multiprocessing as mp
 import asyncio
 import websockets
-import datetime
-from pages.create_patient import CreatePatient
-from models.Patient import Patient
 style.use("ggplot")
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
 
 
 class CameraAndGraph(tk.Frame):
-    def __init__(self, parent, controller, create_patient_page,patient):
+    def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-
 		
-		# # label of frame Layout 2
+        # # label of frame Layout 2
         # label = ttk.Label(self, text ="Startpage",)
 		
 		# # putting the grid in its place by using
 		# # grid
         # label.grid(row = 0, column = 4, padx = 10, pady = 10)
 
+        self.controller = controller
 
         """
         Define bounding_box ROI with 4 coordination
@@ -51,7 +48,7 @@ class CameraAndGraph(tk.Frame):
         # Initialize attribute value
         # Define record status to determine that device is recording or not, default value is False
         self.record_status = False
-        self.patient = patient
+        self.patient = self.controller.patient
         # Define 2 arrays
         # x is int array to store frame values
         # y float array to store intensity of nail
@@ -63,7 +60,6 @@ class CameraAndGraph(tk.Frame):
             
         # Create websocket instance for websocket connection
         self.websocket = None
-
 
         # configure the appearance of Tkinter widgets.
         # Use font "Helvetica" with size of font `20`
@@ -93,20 +89,20 @@ class CameraAndGraph(tk.Frame):
         patient_id_label = ttk.Label(patient_data_container, text="รหัสผู้ป่วย", font=("Helvetica", 18))
         patient_id_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
 
-        patient_id_value = ttk.Label(patient_data_container, text=self.patient.patient_id,font=("Helvetica", 18) )
-        patient_id_value.grid(column=1, row=0, sticky=tk.E, padx=5, pady=5)
+        self.patient_id_value = ttk.Label(patient_data_container, text=self.patient.patient_id,font=("Helvetica", 18) )
+        self.patient_id_value.grid(column=1, row=0, sticky=tk.E, padx=5, pady=5)
 
         firstname_label = ttk.Label(patient_data_container, text="ชื่อ", font=("Helvetica", 18))
         firstname_label.grid(column=0, row=1, sticky=tk.W, padx=5, pady=5)
 
-        firstname_value = ttk.Label(patient_data_container,  text=self.patient.first_name, font=("Helvetica", 18))
-        firstname_value.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
+        self.firstname_value = ttk.Label(patient_data_container,  text=self.patient.first_name, font=("Helvetica", 18))
+        self.firstname_value.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
 
-        firstname_label = ttk.Label(patient_data_container, text="นามสกุล", font=("Helvetica", 18))
-        firstname_label.grid(column=0, row=2, sticky=tk.W, padx=5, pady=5)
+        lastname_label = ttk.Label(patient_data_container, text="นามสกุล", font=("Helvetica", 18))
+        lastname_label.grid(column=0, row=2, sticky=tk.W, padx=5, pady=5)
 
-        firstname_value = ttk.Label(patient_data_container,  text=self.patient.first_name,font=("Helvetica", 18))
-        firstname_value.grid(column=1, row=2, sticky=tk.E, padx=5, pady=5)
+        self.lastname_value = ttk.Label(patient_data_container,  text=self.patient.first_name,font=("Helvetica", 18))
+        self.lastname_value.grid(column=1, row=2, sticky=tk.E, padx=5, pady=5)
         
         ########## These're component for graph and button section ####################
         # Define second column for display graph and button
@@ -155,13 +151,22 @@ class CameraAndGraph(tk.Frame):
         add_patient_btn = ttk.Button(button_row,
                                           bootstyle="success",
                                           text="เพิ่มข้อมูลผู้ป่วย", 
-                                          command = lambda : controller.show_frame(create_patient_page),
+                                          command=self.navigate_to_create_patient,
                                           width=12)
     
 
         add_patient_btn.pack(padx=10, pady=0, side=tk.RIGHT, anchor=tk.CENTER, ipadx=15, ipady=15)
-    
+        
         self.show_camera()
+    
+    def patient_data_on_change(self):
+        self.patient_id_value.configure(text=self.patient.patient_id)
+        self.firstname_value.configure(text=self.patient.first_name)
+        self.lastname_value.configure(text=self.patient.last_name)
+
+    def navigate_to_create_patient(self):
+        create_patient_page = self.controller.get_page("CreatePatient").__class__
+        self.controller.show_frame(create_patient_page)
 
     def animate(self, i):
         # update the data for the plot

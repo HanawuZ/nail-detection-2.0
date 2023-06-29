@@ -2,6 +2,7 @@ import tkinter as tk
 from pages.camera_and_graph import CameraAndGraph
 from pages.create_patient import CreatePatient
 from models.Patient import Patient
+from pprint import pprint
 
 class App(tk.Tk):
 	
@@ -24,22 +25,32 @@ class App(tk.Tk):
 		# initializing frames to an empty array
 		self.frames = {}
 		
-		camera_and_graph = CameraAndGraph(container, self, CreatePatient,self.patient)
+		camera_and_graph = CameraAndGraph(container, self)
 		self.frames[CameraAndGraph] = camera_and_graph
 		camera_and_graph.grid(row = 0, column = 0, sticky ="nsew")
 		
-		create_patient = CreatePatient(container, self, CameraAndGraph,self.patient)
+		create_patient = CreatePatient(container, self)
 		self.frames[CreatePatient] = create_patient
 		create_patient.grid(row = 0, column = 0, sticky ="nsew")
 
         # Open CameraAndGraph first if app is execute
 		self.show_frame(CameraAndGraph)
 
+		# pprint(self.frames)
+
 	# to display the current frame passed as
 	# parameter
 	def show_frame(self, cont):
 		frame = self.frames[cont]
 		frame.tkraise()
+
+	def get_page(self, classname):
+		'''Returns an instance of a page given it's class name as a string'''
+		for page in self.frames.values():
+			if str(page.__class__.__name__) == classname:
+				return page
+		return None
+
 
 # first window frame startpage
 

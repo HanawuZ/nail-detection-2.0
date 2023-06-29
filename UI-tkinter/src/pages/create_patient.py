@@ -1,13 +1,14 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 # from pages.camera_and_graph import CameraAndGraph
+
 class CreatePatient(tk.Frame):
-    def __init__(self, parent, controller, camera_and_graph, patient):
+    def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.bind("<Escape>", lambda e: self.quit())
 
-        self.patient = patient
-        self.camera_and_graph = camera_and_graph
+        self.controller = controller
+
         container = tk.Frame(self, borderwidth=1, relief="solid")
         container.pack(side = "top", fill = "y", expand = True, padx=30, pady=30)
 
@@ -83,7 +84,7 @@ class CreatePatient(tk.Frame):
         back_button = ttk.Button(back_btn_frame, 
                                  bootstyle="danger-outline",
                                  text="ย้อนกลับ", 
-                                 command = lambda : controller.show_frame(camera_and_graph),
+                                 command=self.navigate_to_camera_and_graph
                                  )
     
         back_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER, relheight=0.75, relwidth=0.75)
@@ -93,14 +94,24 @@ class CreatePatient(tk.Frame):
 
         back_button = ttk.Button(back_btn_frame, 
                                  bootstyle="success",
-                                 text="บันทึก", )
+                                 text="บันทึก", 
+                                 command=self.add_patient_data
+                                 )
     
         back_button.place(relx=0.5, rely=0.5, anchor=tk.CENTER, relheight=0.75,  relwidth=0.75)
     
     def add_patient_data(self):
         patient_id = self.patient_id_entry.get()
-        firstname = self.firstname_entry.get()
-        lastname = self.lastname_entry.get()
+        first_name = self.firstname_entry.get()
+        last_name = self.lastname_entry.get()
+
+        self.controller.patient.set_patient_data(patient_id, first_name, last_name)
+        camera_and_graph = self.controller.get_page("CameraAndGraph")
+        camera_and_graph.patient_data_on_change()
+
+    def navigate_to_camera_and_graph(self):
+        camera_and_graph = self.controller.get_page("CameraAndGraph").__class__
+        self.controller.show_frame(camera_and_graph)
 
 
 if __name__ == "__main__":
