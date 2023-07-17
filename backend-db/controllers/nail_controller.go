@@ -21,7 +21,7 @@ func CreateNail(c *gin.Context) {
 	var nail models.Nail
 	defer cancel()
 
-	if err := c.BindJSON(&nail); err != nil {
+	if err := c.ShouldBindJSON(&nail); err != nil {
 		c.JSON(http.StatusBadRequest, responses.NailResponse{
 			Status:  http.StatusBadRequest,
 			Message: "error",
