@@ -15,6 +15,7 @@ import requests
 style.use("ggplot")
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
+from .view_result import ViewResult
 
 import pigpio
 
@@ -118,6 +119,16 @@ class CameraAndGraph(tk.Frame):
         
         ########## These're component for graph and button section ####################
         # Define second column for display graph and button
+
+        self.tab_control = ttk.Notebook(self)
+
+        tab1 = ttk.Frame(self.tab_control)
+        tab2 = ViewResult(self.tab_control)
+
+        self.tab_control.add(tab1, text ="Real-time Graph")
+        self.tab_control.add(tab2, text ="View Result")
+        self.tab_control.pack(expand = 1, fill ="both")
+
         col2 = tk.Frame(self,width=630,height=720)
         col2.pack(anchor=tk.CENTER)
         col2.grid_propagate(0)
@@ -126,7 +137,7 @@ class CameraAndGraph(tk.Frame):
         col2.grid_columnconfigure(0, weight=1)
         
         # Define a text to show that x axis is Time(in second)
-        graph_label = tk.Label(col2, text="Graph", font=("Helvetica", 26))
+        graph_label = tk.Label(tab1, text="Graph", font=("Helvetica", 26))
         graph_label.grid(row=1)
 
         # Define figure for graph with size of (5.5,4)
@@ -134,11 +145,11 @@ class CameraAndGraph(tk.Frame):
         self.ax = self.fig.add_subplot(1, 1, 1)
 
         # Define graph section
-        graph_row = tk.Frame(col2)
+        graph_row = tk.Frame(tab1)
         graph_row.grid(row=2)
         
         # Define a text to show that x axis is Time(in second)
-        x_label = tk.Label(col2, text="Time(s)", font=("Helvetica", 18))
+        x_label = tk.Label(tab1, text="Time(s)", font=("Helvetica", 18))
         x_label.grid(row=3)
 
         # create a canvas to display the plot
