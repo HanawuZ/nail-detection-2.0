@@ -2,14 +2,13 @@ import tkinter as tk
 from pages.camera_and_graph import CameraAndGraph
 from pages.create_patient import CreatePatient
 from models.Patient import Patient
-from pprint import pprint
 
 class App(tk.Tk):
 	
 	# __init__ function for class tkinterApp
 	def __init__(self, *args, **kwargs):
 		
-		self.patient = Patient("HN123456789", "John", "Doe")
+		self.patient = Patient()
 
 		# __init__ function for class Tk
 		tk.Tk.__init__(self, *args, **kwargs)

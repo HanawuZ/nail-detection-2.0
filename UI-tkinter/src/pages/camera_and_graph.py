@@ -10,8 +10,8 @@ from matplotlib import style
 import matplotlib.animation as animation
 import numpy as np
 import multiprocessing as mp
-import asyncio
-import websockets
+import json
+import requests
 style.use("ggplot")
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
@@ -33,9 +33,11 @@ class CameraAndGraph(tk.Frame):
         # label.grid(row = 0, column = 4, padx = 10, pady = 10)
 
         self.controller = controller
-        self.pi = pigpio.pi() # Connect to local Pi.
-        self.pi.set_mode(17, pigpio.OUTPUT)
-        self.pi.set_servo_pulsewidth(17,1250) #closed
+
+        # If inference on PC, please comment it
+        # self.pi = pigpio.pi() # Connect to local Pi.
+        # self.pi.set_mode(17, pigpio.OUTPUT)
+        # self.pi.set_servo_pulsewidth(17,1250) #closed
         """
         Define bounding_box ROI with 4 coordinates
         (300,250)-------(350,250)
@@ -166,7 +168,21 @@ class CameraAndGraph(tk.Frame):
     
 
         add_patient_btn.pack(padx=10, pady=0, side=tk.RIGHT, anchor=tk.CENTER, ipadx=15, ipady=15)
-        
+
+        insert_patient_data_btn = ttk.Button(button_row,
+                                          bootstyle="success",
+                                          text="บันทึกข้อมูลผู้ป่วย", 
+                                          command=self.insert_patient_data,
+                                          width=12)
+    
+
+        insert_patient_data_btn.pack(padx=10, pady=0, side=tk.RIGHT, anchor=tk.CENTER, ipadx=15, ipady=15)
+
+        data_row = tk.Frame(col2)
+        data_row.grid(row=5, pady=(30,0))
+
+        data_label = tk.Label(data_row, text=str(self.intensity_list), font=("Helvetica", 26))
+        data_label.grid(row=1)
         self.show_camera()
     
     def patient_data_on_change(self):
@@ -174,6 +190,24 @@ class CameraAndGraph(tk.Frame):
         self.firstname_value.configure(text=self.patient.first_name)
         self.lastname_value.configure(text=self.patient.last_name)
 
+
+    def insert_patient_data(self):
+        patient_data = {
+            "pid" : self.patient.patient_id,
+            "pname" : self.patient.first_name,
+            "psurname" : self.patient.last_name,
+            "data":self.intensity_list,
+        }
+        if len(self.intensity_list) == 0 :
+            print("Please collect data value")
+        else :
+            try :
+                json_object = json.dumps(patient_data, indent = 4) 
+                response = requests.post('http://localhost:8080/nail', data=json_object)
+                print(response)
+                self.intensity_list.clear()
+            except:
+                print("Error, please try again!!")
     def navigate_to_create_patient(self):
         create_patient_page = self.controller.get_page("CreatePatient")
         create_patient_page.use_effect()
@@ -248,16 +282,13 @@ class CameraAndGraph(tk.Frame):
         #print(self.intensity_list)
 
     def press_servo(self):
+        self.intensity_list.clear()
         self.record_status_on_change()
-        self.pi.set_servo_pulsewidth(17,1000)
+
+        # Comment if run on PC
+        # self.pi.set_servo_pulsewidth(17,1000)
         
-        # Create record process object
-        #self.record = Record(cap=self.cap)
-            
-        # Start record process
-        #self.record.start()
-        
-        self.after(5000, lambda : self.pi.set_servo_pulsewidth(17,1900))
+        # self.after(5000, lambda : self.pi.set_servo_pulsewidth(17,1900))
         self.after(10000, self.record_status_on_change)
     
         

@@ -1,13 +1,15 @@
 import tkinter as tk
 import ttkbootstrap as ttk
 import subprocess
-# from pages.camera_and_graph import CameraAndGraph
+
 
 class CreatePatient(tk.Frame):
     def show_virtual_keyboard(self):
         subprocess.call(["onboard"])
 
+
     def add_patient_data(self):
+
         patient_id = self.patient_id_entry.get()
         first_name = self.firstname_entry.get()
         last_name = self.lastname_entry.get()
@@ -87,17 +89,6 @@ class CreatePatient(tk.Frame):
         self.lastname_entry.pack(anchor="w", padx=(20,0), ipady=5)
         self.lastname_entry.bind("<Button-1>", lambda event: self.show_virtual_keyboard())
 
-
-        # Add label and textfield for Patient_ID
-        datetime_frame = tk.Frame(container,borderwidth=1, relief="solid")
-        datetime_frame.pack(fill="x")
-
-
-        datetime_label = tk.Label(datetime_frame, text="วัน/เดือน/ปี เวลา", font=("Helvetica", 18))
-        datetime_label.pack(anchor="w", padx=(15,0))
-
-        datetime_entry = ttk.Entry(datetime_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
-        datetime_entry.pack(anchor="w", padx=(20,0), ipady=5)
 
 
         buttons_row = tk.Frame(container,borderwidth=1, relief="solid")
