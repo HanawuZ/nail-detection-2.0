@@ -12,10 +12,10 @@ import numpy as np
 import multiprocessing as mp
 import json
 import requests
+from .add_patient import AddPatient
 style.use("ggplot")
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
-from .view_result import ViewResult
 
 import pigpio
 
@@ -95,39 +95,40 @@ class CameraAndGraph(tk.Frame):
         self.camera = tk.Label(camera_col)
         self.camera.grid(row=2,pady=(0,0), padx=(20,20))
 
-        patient_data_container = tk.Frame(camera_col, borderwidth=1, relief="solid")
-        patient_data_container.grid(row=3, )
+        # Add row section for start button & create patient data button
+        button_row = tk.Frame(camera_col)
+        button_row.grid(row=4, pady=(30,0))
 
-        
-        patient_id_label = ttk.Label(patient_data_container, text="รหัสผู้ป่วย", font=("Helvetica", 18))
-        patient_id_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
+        start_button = ttk.Button(button_row, 
+                                       bootstyle="outline",
+                                       text="Start",
+                                        command=self.press_servo,
+                                       width=12)
+    
 
-        self.patient_id_value = ttk.Label(patient_data_container, text=self.patient.patient_id,font=("Helvetica", 18) )
-        self.patient_id_value.grid(column=1, row=0, sticky=tk.E, padx=5, pady=5)
+        start_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
+        clear_button = ttk.Button(button_row, 
+                                       bootstyle="outline",
+                                       text="Clear",
+                                       width=12)
+    
 
-        firstname_label = ttk.Label(patient_data_container, text="ชื่อ", font=("Helvetica", 18))
-        firstname_label.grid(column=0, row=1, sticky=tk.W, padx=5, pady=5)
-
-        self.firstname_value = ttk.Label(patient_data_container,  text=self.patient.first_name, font=("Helvetica", 18))
-        self.firstname_value.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
-
-        lastname_label = ttk.Label(patient_data_container, text="นามสกุล", font=("Helvetica", 18))
-        lastname_label.grid(column=0, row=2, sticky=tk.W, padx=5, pady=5)
-
-        self.lastname_value = ttk.Label(patient_data_container,  text=self.patient.first_name,font=("Helvetica", 18))
-        self.lastname_value.grid(column=1, row=2, sticky=tk.E, padx=5, pady=5)
+        clear_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
         
         ########## These're component for graph and button section ####################
         # Define second column for display graph and button
 
         self.tab_control = ttk.Notebook(self)
+        
 
         tab1 = ttk.Frame(self.tab_control)
-        tab2 = ViewResult(self.tab_control)
+        tab2 = AddPatient(self.tab_control,controller)
 
-        self.tab_control.add(tab1, text ="Real-time Graph")
-        self.tab_control.add(tab2, text ="View Result")
+        self.tab_control.add(tab1, text ="Home")
         self.tab_control.pack(expand = 1, fill ="both")
+        self.tab_control.add(tab2, text ="กรอกข้อมูลผู้ป่วย")
+        self.tab_control.pack(expand = 1, fill ="both")
+
 
         col2 = tk.Frame(self,width=630,height=720)
         col2.pack(anchor=tk.CENTER)
@@ -158,48 +159,35 @@ class CameraAndGraph(tk.Frame):
         canvas.get_tk_widget().pack(anchor=tk.CENTER, fill=tk.BOTH)
         
         self.anim = animation.FuncAnimation(self.fig, self.animate, interval=500)
+        
+        patient_data_container = tk.Frame(col2, borderwidth=1, relief="solid")
+        patient_data_container.grid(row=3, )
 
-        # Add row section for start button & create patient data button
-        button_row = tk.Frame(col2)
-        button_row.grid(row=4, pady=(30,0))
+        
+        patient_id_label = ttk.Label(patient_data_container, text="รหัสผู้ป่วย", font=("Helvetica", 18))
+        patient_id_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
 
-        start_button = ttk.Button(button_row, 
-                                       bootstyle="outline",
-                                       text="Start",
-                                        command=self.press_servo,
-                                       width=12)
-    
+        self.patient_id_value = ttk.Label(patient_data_container, text=self.patient.patient_id,font=("Helvetica", 18) )
+        self.patient_id_value.grid(column=1, row=0, sticky=tk.E, padx=5, pady=5)
 
-        start_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
-        add_patient_btn = ttk.Button(button_row,
-                                          bootstyle="success",
-                                          text="เพิ่มข้อมูลผู้ป่วย", 
-                                          command=self.navigate_to_create_patient,
-                                          width=12)
-    
+        firstname_label = ttk.Label(patient_data_container, text="ชื่อ", font=("Helvetica", 18))
+        firstname_label.grid(column=0, row=1, sticky=tk.W, padx=5, pady=5)
 
-        add_patient_btn.pack(padx=10, pady=0, side=tk.RIGHT, anchor=tk.CENTER, ipadx=15, ipady=15)
+        self.firstname_value = ttk.Label(patient_data_container,  text=self.patient.first_name, font=("Helvetica", 18))
+        self.firstname_value.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
 
-        insert_patient_data_btn = ttk.Button(button_row,
-                                          bootstyle="success",
-                                          text="บันทึกข้อมูลผู้ป่วย", 
-                                          command=self.insert_patient_data,
-                                          width=12)
-    
+        lastname_label = ttk.Label(patient_data_container, text="นามสกุล", font=("Helvetica", 18))
+        lastname_label.grid(column=0, row=2, sticky=tk.W, padx=5, pady=5)
 
-        insert_patient_data_btn.pack(padx=10, pady=0, side=tk.RIGHT, anchor=tk.CENTER, ipadx=15, ipady=15)
-
-        data_row = tk.Frame(col2)
-        data_row.grid(row=5, pady=(30,0))
-
-        data_label = tk.Label(data_row, text=str(self.intensity_list), font=("Helvetica", 26))
-        data_label.grid(row=1)
+        self.lastname_value = ttk.Label(patient_data_container,  text=self.patient.first_name,font=("Helvetica", 18))
+        self.lastname_value.grid(column=1, row=2, sticky=tk.E, padx=5, pady=5)
+        
         self.show_camera()
     
-    def patient_data_on_change(self):
-        self.patient_id_value.configure(text=self.patient.patient_id)
-        self.firstname_value.configure(text=self.patient.first_name)
-        self.lastname_value.configure(text=self.patient.last_name)
+    def update_data(self,data):
+        self.patient_id_value.configure(text=data["patient_id"])
+        self.firstname_value.configure(text=data["firstname"])
+        self.lastname_value.configure(text=data["lastname"])
 
 
     def insert_patient_data(self):
@@ -219,10 +207,7 @@ class CameraAndGraph(tk.Frame):
                 self.intensity_list.clear()
             except:
                 print("Error, please try again!!")
-    def navigate_to_create_patient(self):
-        create_patient_page = self.controller.get_page("CreatePatient")
-        create_patient_page.use_effect()
-        self.controller.show_frame(create_patient_page.__class__)
+
         
     def animate(self, i):
         # update the data for the plot
@@ -233,7 +218,7 @@ class CameraAndGraph(tk.Frame):
         self.ax.clear()
         self.ax.plot(xs,ys)
         self.lock.release()
-        # self.ax.set_ylim(0, 2)
+        self.ax.set_ylim([0,220])
 
     def show_camera(self):
         ret, self.frame = self.cap.read()
