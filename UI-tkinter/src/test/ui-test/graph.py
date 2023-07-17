@@ -1,48 +1,94 @@
 import tkinter as tk
-import pandas as pd
-import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import matplotlib.animation as animation
 
-data1 = {'country': ['A', 'B', 'C', 'D', 'E'],
-         'gdp_per_capita': [45000, 42000, 52000, 49000, 47000]
-         }
-df1 = pd.DataFrame(data1)
 
-data2 = {'year': [1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010],
-         'unemployment_rate': [9.8, 12, 8, 7.2, 6.9, 7, 6.5, 6.2, 5.5, 6.3]
-         }  
-df2 = pd.DataFrame(data2)
+class GraphPage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent)
+        self.parent = parent
+        self.create_graph()
 
-data3 = {'interest_rate': [5, 5.5, 6, 5.5, 5.25, 6.5, 7, 8, 7.5, 8.5],
-         'index_price': [1500, 1520, 1525, 1523, 1515, 1540, 1545, 1560, 1555, 1565]
-         }
-df3 = pd.DataFrame(data3)
+    def create_graph(self):
+        # Create a figure and axis for the graph
+        self.fig = Figure(figsize=(6, 4), dpi=100)
+        self.ax = self.fig.add_subplot(111)
 
-root = tk.Tk()
+        # Generate some initial data
+        self.x_data = [1, 2, 3, 4, 5]
+        self.y_data = [1, 4, 9, 16, 25]
 
-figure1 = plt.Figure(figsize=(6, 5), dpi=100)
-ax1 = figure1.add_subplot(111)
-bar1 = FigureCanvasTkAgg(figure1, root)
-bar1.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
-df1 = df1[['country', 'gdp_per_capita']].groupby('country').sum()
-df1.plot(kind='bar', legend=True, ax=ax1)
-ax1.set_title('Country Vs. GDP Per Capita')
+        # Create a line plot
+        self.line, = self.ax.plot(self.x_data, self.y_data)
 
-figure2 = plt.Figure(figsize=(5, 4), dpi=100)
-ax2 = figure2.add_subplot(111)
-line2 = FigureCanvasTkAgg(figure2, root)
-line2.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
-df2 = df2[['year', 'unemployment_rate']].groupby('year').sum()
-df2.plot(kind='line', legend=True, ax=ax2, color='r', marker='o', fontsize=10)
-ax2.set_title('Year Vs. Unemployment Rate')
+        # Create a canvas to display the graph
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack()
 
-figure3 = plt.Figure(figsize=(5, 4), dpi=100)
-ax3 = figure3.add_subplot(111)
-ax3.scatter(df3['interest_rate'], df3['index_price'], color='g')
-scatter3 = FigureCanvasTkAgg(figure3, root)
-scatter3.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH)
-ax3.legend(['index_price'])
-ax3.set_xlabel('Interest Rate')
-ax3.set_title('Interest Rate Vs. Index Price')
+    def animate(self, i):
+        # Generate new data for animation
+        self.x_data.append(self.x_data[-1] + 1)
+        self.y_data.append((self.x_data[-1] + 1) ** 2)
 
-root.mainloop()
+        # Update the line plot with new data
+        self.line.set_data(self.x_data, self.y_data)
+
+        # Adjust the plot limits if needed
+        self.ax.relim()
+        self.ax.autoscale_view()
+
+    def on_enter(self):
+        # Start the animation when entering the page
+        self.animation = animation.FuncAnimation(self.fig, self.animate, interval=100)
+        self.canvas.draw()
+
+    def on_leave(self):
+        # Stop the animation when leaving the page
+        self.animation.event_source.stop()
+
+
+class MainPage(tk.Frame):
+    def __init__(self, parent, graph_page):
+        tk.Frame.__init__(self, parent)
+        self.parent = parent
+        self.graph_page = graph_page
+        self.create_button()
+
+    def create_button(self):
+        button = tk.Button(self, text="Go to Graph Page", command=self.go_to_graph_page)
+        button.pack()
+
+    def go_to_graph_page(self):
+        self.parent.show_frame(GraphPage)
+        self.graph_page.on_enter()
+
+
+class Application(tk.Tk):
+    def __init__(self):
+        tk.Tk.__init__(self)
+        self.title("Tkinter Animated Graph Example")
+
+        self.container = tk.Frame(self)
+        self.container.pack(side="top", fill="both", expand=True)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+        self.graph_page = GraphPage(self.container)
+        self.add_frame(MainPage)
+
+    def add_frame(self, frame_class):
+        frame = frame_class(self.container, self.graph_page)
+        self.frames[frame_class] = frame
+        frame.grid(row=0, column=0, sticky="nsew")
+
+    def show_frame(self, frame_class):
+        frame = self.frames[frame_class]
+        frame.tkraise()
+
+
+if __name__ == "__main__":
+    app = Application()
+    app.mainloop()

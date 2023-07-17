@@ -1,6 +1,5 @@
 import tkinter as tk
 import ttkbootstrap as ttk
-import subprocess
 
 
 class AddPatient(tk.Frame):

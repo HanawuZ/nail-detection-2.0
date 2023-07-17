@@ -1,6 +1,6 @@
 import tkinter as tk
 from pages.camera_and_graph import CameraAndGraph
-from pages.add_patient import AddPatient
+from pages.save_patient_data import ViewAndSavePatient
 from models.Patient import Patient
 
 class App(tk.Tk):
@@ -29,9 +29,9 @@ class App(tk.Tk):
 		self.frames[CameraAndGraph] = camera_and_graph
 		camera_and_graph.grid(row = 0, column = 0, sticky ="nsew")
 		
-		# add_patient = AddPatient(container, self)
-		# self.frames[AddPatient] = add_patient
-		# add_patient.grid(row = 0, column = 0, sticky ="nsew")
+		view_and_save_patient = ViewAndSavePatient(container, self)
+		self.frames[ViewAndSavePatient] = view_and_save_patient
+		view_and_save_patient.grid(row = 0, column = 0, sticky ="nsew")
 
         # Open CameraAndGraph first if app is execute
 		self.show_frame(CameraAndGraph)
@@ -42,6 +42,7 @@ class App(tk.Tk):
 	# parameter
 	def show_frame(self, cont):
 		frame = self.frames[cont]
+		frame.on_enter()
 		frame.tkraise()
 
 	def get_page(self, classname):

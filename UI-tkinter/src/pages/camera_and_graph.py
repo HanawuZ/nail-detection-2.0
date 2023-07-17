@@ -10,17 +10,11 @@ from matplotlib import style
 import matplotlib.animation as animation
 import numpy as np
 import multiprocessing as mp
-import json
-import requests
 from .add_patient import AddPatient
 style.use("ggplot")
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
-
 import pigpio
-
-
-
 
 class CameraAndGraph(tk.Frame):
     def __init__(self, parent, controller):
@@ -104,16 +98,8 @@ class CameraAndGraph(tk.Frame):
                                        text="Start",
                                         command=self.press_servo,
                                        width=12)
-    
 
         start_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
-        clear_button = ttk.Button(button_row, 
-                                       bootstyle="outline",
-                                       text="Clear",
-                                       width=12)
-    
-
-        clear_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
         
         ########## These're component for graph and button section ####################
         # Define second column for display graph and button
@@ -159,54 +145,27 @@ class CameraAndGraph(tk.Frame):
         canvas.get_tk_widget().pack(anchor=tk.CENTER, fill=tk.BOTH)
         
         self.anim = animation.FuncAnimation(self.fig, self.animate, interval=500)
-        
-        patient_data_container = tk.Frame(col2, borderwidth=1, relief="solid")
-        patient_data_container.grid(row=3, )
 
-        
-        patient_id_label = ttk.Label(patient_data_container, text="รหัสผู้ป่วย", font=("Helvetica", 18))
-        patient_id_label.grid(column=0, row=0, sticky=tk.W, padx=5, pady=5)
+                # Add row section for start button & create patient data button
+        button_row = tk.Frame(col2)
+        button_row.grid(row=4, pady=(30,0))
 
-        self.patient_id_value = ttk.Label(patient_data_container, text=self.patient.patient_id,font=("Helvetica", 18) )
-        self.patient_id_value.grid(column=1, row=0, sticky=tk.E, padx=5, pady=5)
-
-        firstname_label = ttk.Label(patient_data_container, text="ชื่อ", font=("Helvetica", 18))
-        firstname_label.grid(column=0, row=1, sticky=tk.W, padx=5, pady=5)
-
-        self.firstname_value = ttk.Label(patient_data_container,  text=self.patient.first_name, font=("Helvetica", 18))
-        self.firstname_value.grid(column=1, row=1, sticky=tk.E, padx=5, pady=5)
-
-        lastname_label = ttk.Label(patient_data_container, text="นามสกุล", font=("Helvetica", 18))
-        lastname_label.grid(column=0, row=2, sticky=tk.W, padx=5, pady=5)
-
-        self.lastname_value = ttk.Label(patient_data_container,  text=self.patient.first_name,font=("Helvetica", 18))
-        self.lastname_value.grid(column=1, row=2, sticky=tk.E, padx=5, pady=5)
+        start_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
+        save_patient_btn = ttk.Button(button_row,
+                                      bootstyle="primary",
+                                      text="บันทึกข้อมูลผู้ป่วย", 
+                                      command=self.navigate_to_view,
+                                      width=12)
+    
+        save_patient_btn.pack(padx=10, pady=0, side=tk.RIGHT, anchor=tk.CENTER, ipadx=15, ipady=15)
         
         self.show_camera()
     
     def update_data(self,data):
-        self.patient_id_value.configure(text=data["patient_id"])
-        self.firstname_value.configure(text=data["firstname"])
-        self.lastname_value.configure(text=data["lastname"])
+        self.controller.patient.set_patient_data(data["patient_id"], data["firstname"],data["lastname"])
 
 
-    def insert_patient_data(self):
-        patient_data = {
-            "pid" : self.patient.patient_id,
-            "pname" : self.patient.first_name,
-            "psurname" : self.patient.last_name,
-            "data":self.intensity_list,
-        }
-        if len(self.intensity_list) == 0 :
-            print("Please collect data value")
-        else :
-            try :
-                json_object = json.dumps(patient_data, indent = 4) 
-                response = requests.post('http://localhost:8080/nail', data=json_object)
-                print(response)
-                self.intensity_list.clear()
-            except:
-                print("Error, please try again!!")
+
 
         
     def animate(self, i):
@@ -274,6 +233,7 @@ class CameraAndGraph(tk.Frame):
     
     def record_status_on_change(self):
         self.record_status = not self.record_status
+        self.patient.set_intensity(self.intensity_list)
         #rint(len(self.intensity_list))
         #print(self.intensity_list)
 
@@ -287,7 +247,16 @@ class CameraAndGraph(tk.Frame):
         # self.after(5000, lambda : self.pi.set_servo_pulsewidth(17,1900))
         self.after(10000, self.record_status_on_change)
     
+
+    def navigate_to_view(self):
+        view_and_save_patient = self.controller.get_page("ViewAndSavePatient").__class__
+        self.controller.show_frame(view_and_save_patient)
+
         
+    def on_enter(self):
+        pass
+    def on_leave(self):
+        pass
 ##############################################################################################	
 
 # ***************** path to Multiprocessing (Recording) **********************
