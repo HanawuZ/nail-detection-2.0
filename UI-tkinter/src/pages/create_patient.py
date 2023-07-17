@@ -1,8 +1,11 @@
 import tkinter as tk
 import ttkbootstrap as ttk
+import subprocess
 # from pages.camera_and_graph import CameraAndGraph
 
 class CreatePatient(tk.Frame):
+    def show_virtual_keyboard(self):
+        subprocess.call(["onboard"])
 
     def add_patient_data(self):
         patient_id = self.patient_id_entry.get()
@@ -55,8 +58,10 @@ class CreatePatient(tk.Frame):
         patient_id_label.pack(anchor="w", padx=(0,0))
         
 
-        self.patient_id_entry = ttk.Entry(patient_id_frame, bootstyle="primary", font=("Helvetica", 16), width=55)
+        self.patient_id_entry = tk.Entry(patient_id_frame, font=("Helvetica", 16), width=55)
         self.patient_id_entry.pack(anchor="w", padx=(20,0), ipady=5)
+        self.patient_id_entry.bind("<Button-1>", lambda event: self.show_virtual_keyboard())
+
 
 
 
@@ -69,6 +74,8 @@ class CreatePatient(tk.Frame):
 
         self.firstname_entry = ttk.Entry(firstname_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
         self.firstname_entry.pack(anchor="w", padx=(20,0), ipady=5)
+        self.firstname_entry.bind("<Button-1>", lambda event: self.show_virtual_keyboard())
+
 
         lastname_frame = tk.Frame(container,borderwidth=1, relief="solid")
         lastname_frame.pack(anchor="w", padx=(15,0), fill="x")
@@ -78,6 +85,8 @@ class CreatePatient(tk.Frame):
 
         self.lastname_entry = ttk.Entry(firstname_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
         self.lastname_entry.pack(anchor="w", padx=(20,0), ipady=5)
+        self.lastname_entry.bind("<Button-1>", lambda event: self.show_virtual_keyboard())
+
 
         # Add label and textfield for Patient_ID
         datetime_frame = tk.Frame(container,borderwidth=1, relief="solid")

@@ -16,6 +16,10 @@ style.use("ggplot")
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
 
+import pigpio
+
+
+
 
 class CameraAndGraph(tk.Frame):
     def __init__(self, parent, controller):
@@ -29,9 +33,11 @@ class CameraAndGraph(tk.Frame):
         # label.grid(row = 0, column = 4, padx = 10, pady = 10)
 
         self.controller = controller
-
+        self.pi = pigpio.pi() # Connect to local Pi.
+        self.pi.set_mode(17, pigpio.OUTPUT)
+        self.pi.set_servo_pulsewidth(17,1250) #closed
         """
-        Define bounding_box ROI with 4 coordination
+        Define bounding_box ROI with 4 coordinates
         (300,250)-------(350,250)
             |               |
             |               |
@@ -43,7 +49,9 @@ class CameraAndGraph(tk.Frame):
             (350,280),
             (300,280),
         ]])
+        vid_output_path = os.path.join(pathlib.Path(__file__).parent,"output_sample.avi")
         self.cap = cv2.VideoCapture(0)
+        self.video_recorder = cv2.VideoWriter(vid_output_path,cv2.VideoWriter_fourcc("M","J","P","G"), 30, (640,480))
 
         # Initialize attribute value
         # Define record status to determine that device is recording or not, default value is False
@@ -55,12 +63,14 @@ class CameraAndGraph(tk.Frame):
         self.x=[0]
         self.y=[0]
         
+        self.intensity_list = []
         # Create lock instance for mutual exclusion lock
         self.lock = mp.Lock()
             
         # Create websocket instance for websocket connection
         self.websocket = None
-
+        
+        self.start_time = 0
         # configure the appearance of Tkinter widgets.
         # Use font "Helvetica" with size of font `20`
         self.style = ttk.Style()
@@ -143,7 +153,7 @@ class CameraAndGraph(tk.Frame):
         start_button = ttk.Button(button_row, 
                                        bootstyle="outline",
                                        text="Start",
-                                       command=self.start_record,
+                                        command=self.press_servo,
                                        width=12)
     
 
@@ -183,6 +193,7 @@ class CameraAndGraph(tk.Frame):
     def show_camera(self):
         ret, self.frame = self.cap.read()
         if(ret):
+            
             cv2image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
 
             gray_frame = cv2.cvtColor(cv2image, cv2.COLOR_BGR2GRAY)
@@ -190,14 +201,18 @@ class CameraAndGraph(tk.Frame):
             cv2image = contrast_frame
             in_roi_frame = contrast_frame[300:351, 250:281]
             
+                
             if self.record_status:
+                # self.video_recorder.write(self.frame)
                 cv2.putText(cv2image, "Running",(30,30), cv2.FONT_HERSHEY_DUPLEX, 1.0, [255, 0, 0],2)
+
             else:
                 cv2.putText(cv2image, "Idle",(30,30), cv2.FONT_HERSHEY_DUPLEX, 1.0, [0, 255, 0],2)
    
             # Draw bounding box on frame.
             cv2.polylines(cv2image,self.bounding_box,True,(0,255,255))
             
+
             # Calculate average intensity of interesting nail area
             avg_intensity = np.mean(in_roi_frame)
             
@@ -207,7 +222,8 @@ class CameraAndGraph(tk.Frame):
             # avg_intensity = avg_intensity/0.1
             
             self.lock.acquire()
-
+            if self.record_status:
+                self.intensity_list.append(avg_intensity)
             self.x.append(self.x[-1]+1)
             self.y.append(avg_intensity)
             self.lock.release()
@@ -225,22 +241,24 @@ class CameraAndGraph(tk.Frame):
         else:
             self.cap.release()
             self.camera.destroy()
-
-    async def connect(self):
-        self.websocket = await websockets.connect("ws://0.0.0.0:8080")
-        
-    def start_record(self):
+    
+    def record_status_on_change(self):
         self.record_status = not self.record_status
-        asyncio.run(self.press_servo())
+        #rint(len(self.intensity_list))
+        #print(self.intensity_list)
 
-    async def press_servo(self):
-        await self.connect()
-        if self.record_status == True:
-            await self.websocket.send("1000")
-        else :
-            await self.websocket.send("1900")
-        await self.websocket.close()
-           
+    def press_servo(self):
+        self.record_status_on_change()
+        self.pi.set_servo_pulsewidth(17,1000)
+        
+        # Create record process object
+        #self.record = Record(cap=self.cap)
+            
+        # Start record process
+        #self.record.start()
+        
+        self.after(5000, lambda : self.pi.set_servo_pulsewidth(17,1900))
+        self.after(10000, self.record_status_on_change)
     
         
 ##############################################################################################	
@@ -252,7 +270,8 @@ class Record(mp.Process):
         self.cap = cap
         vid_output_path = os.path.join(pathlib.Path(__file__).parent,"output_sample.avi")
         self.video_recorder = cv2.VideoWriter(vid_output_path,cv2.VideoWriter_fourcc("M","J","P","G"), 30, (640,480))
-    
+        self.start_time = cv2.getTickCount()
+
     # Process start running this method when process is started
     def run(self):
         print("Run Record")
@@ -260,6 +279,7 @@ class Record(mp.Process):
 
     # Record video, destroy this object when press recording
     def record(self):
+        duration = 10
         while(self.cap.isOpened()):
             check,frame = self.cap.read()
             if check == False:
@@ -267,8 +287,13 @@ class Record(mp.Process):
             else:
                 cv2.putText(frame,"Recording",(30,50),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2,cv2.LINE_AA)
                 self.video_recorder.write(frame)
+                elapsed_time = (cv2.getTickCount() - self.start_time) / cv2.getTickFrequency()
+                
+                # Break the loop if the specified duration has passed
+                if elapsed_time >= duration:
+                    break
                 cv2.waitKey(1)
-
-if __name__ == "__main__":
-    app = CameraAndGraph()
+        
+        self.cap.release()
+        self.video_recorder.release()
 
