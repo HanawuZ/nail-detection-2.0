@@ -29,16 +29,17 @@ class AddPatient(tk.Frame):
     #     self.lastname_entry.delete(0,tk.END)
 
     def update_data(self):
-        firstname_value = self.firstname_entry.get()  # Get the text from the entry widget
-        lastname_value = self.lastname_entry.get()  # Get the text from the entry widget
-        patient_id_value = self.patient_id_entry.get()  # Get the text from the entry widget
-        camera_and_graph = self.controller.get_page("CameraAndGraph")
-        data = {
-            "patient_id" : patient_id_value,
-            "firstname" : firstname_value,
-            "lastname" : lastname_value,
-        }
-        camera_and_graph.update_data(data)  # Call the update_data method in CameraAndGraph
+        pass
+        # firstname_value = self.firstname_entry.get()  # Get the text from the entry widget
+        # lastname_value = self.lastname_entry.get()  # Get the text from the entry widget
+        # patient_id_value = self.patient_id_entry.get()  # Get the text from the entry widget
+        # camera_and_graph = self.controller.get_page("CameraAndGraph")
+        # data = {
+        #     "patient_id" : patient_id_value,
+        #     "firstname" : firstname_value,
+        #     "lastname" : lastname_value,
+        # }
+        # camera_and_graph.update_data(data)  # Call the update_data method in CameraAndGraph
 
     def clear_data(self):
         self.patient_id_entry.delete(0, tk.END)

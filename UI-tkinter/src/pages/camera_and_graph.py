@@ -89,31 +89,34 @@ class CameraAndGraph(tk.Frame):
         self.camera = tk.Label(camera_col)
         self.camera.grid(row=2,pady=(0,0), padx=(20,20))
 
+        self.process_success_label = tk.Label(camera_col)
+        self.process_success_label.grid(row=3, pady=(10,0))
+        # self.process_success_label.config(text="ยังไม่ได้เก็บข้อมูล", font=("Helvetica", 16))
+
         # Add row section for start button & create patient data button
         button_row = tk.Frame(camera_col)
-        button_row.grid(row=4, pady=(30,0))
+        button_row.grid(row=4, pady=(15,0))
 
-        start_button = ttk.Button(button_row, 
-                                       bootstyle="outline",
+        self.start_button = ttk.Button(button_row, 
+                                       bootstyle="primary",
                                        text="Start",
                                         command=self.press_servo,
                                        width=12)
 
-        start_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
+        self.start_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
         
         ########## These're component for graph and button section ####################
         # Define second column for display graph and button
 
-        self.tab_control = ttk.Notebook(self)
-        
+        # self.tab_control = ttk.Notebook(self)
 
-        tab1 = ttk.Frame(self.tab_control)
-        tab2 = AddPatient(self.tab_control,controller)
+        # tab1 = ttk.Frame(self.tab_control)
+        # tab2 = AddPatient(self.tab_control,controller)
 
-        self.tab_control.add(tab1, text ="Home")
-        self.tab_control.pack(expand = 1, fill ="both")
-        self.tab_control.add(tab2, text ="กรอกข้อมูลผู้ป่วย")
-        self.tab_control.pack(expand = 1, fill ="both")
+        # self.tab_control.add(tab1, text ="Home")
+        # self.tab_control.pack(expand = 1, fill ="both")
+        # self.tab_control.add(tab2, text ="กรอกข้อมูลผู้ป่วย")
+        # self.tab_control.pack(expand = 1, fill ="both")
 
 
         col2 = tk.Frame(self,width=630,height=720)
@@ -124,19 +127,19 @@ class CameraAndGraph(tk.Frame):
         col2.grid_columnconfigure(0, weight=1)
         
         # Define a text to show that x axis is Time(in second)
-        graph_label = tk.Label(tab1, text="Graph", font=("Helvetica", 26))
+        graph_label = tk.Label(col2, text="Graph", font=("Helvetica", 26))
         graph_label.grid(row=1)
 
         # Define figure for graph with size of (5.5,4)
-        self.fig = Figure(figsize=(5.5, 4), dpi=100, facecolor="#FFFFFF")
+        self.fig = Figure(figsize=(5.5, 5), dpi=100, facecolor="#FFFFFF")
         self.ax = self.fig.add_subplot(1, 1, 1)
 
         # Define graph section
-        graph_row = tk.Frame(tab1)
+        graph_row = tk.Frame(col2)
         graph_row.grid(row=2)
         
         # Define a text to show that x axis is Time(in second)
-        x_label = tk.Label(tab1, text="Time(s)", font=("Helvetica", 18))
+        x_label = tk.Label(col2, text="Time(s)", font=("Helvetica", 18))
         x_label.grid(row=3)
 
         # create a canvas to display the plot
@@ -148,11 +151,10 @@ class CameraAndGraph(tk.Frame):
 
                 # Add row section for start button & create patient data button
         button_row = tk.Frame(col2)
-        button_row.grid(row=4, pady=(30,0))
+        button_row.grid(row=4, pady=(20,0))
 
-        start_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
         save_patient_btn = ttk.Button(button_row,
-                                      bootstyle="primary",
+                                      bootstyle="success-outline",
                                       text="บันทึกข้อมูลผู้ป่วย", 
                                       command=self.navigate_to_view,
                                       width=12)
@@ -163,10 +165,6 @@ class CameraAndGraph(tk.Frame):
     
     def update_data(self,data):
         self.controller.patient.set_patient_data(data["patient_id"], data["firstname"],data["lastname"])
-
-
-
-
         
     def animate(self, i):
         # update the data for the plot
@@ -226,26 +224,36 @@ class CameraAndGraph(tk.Frame):
             # will call function record when show_camera run after 2 ms
             # self.camera.after(2, self.record)
             # will call recursive function whne pass to 2 ms
-            self.camera.after(5, self.show_camera)
+            self.camera.after(2, self.show_camera)
         else:
             self.cap.release()
             self.camera.destroy()
     
     def record_status_on_change(self):
-        self.record_status = not self.record_status
-        self.patient.set_intensity(self.intensity_list)
+        try :
+            self.record_status = not self.record_status
+            self.patient.set_intensity(self.intensity_list)
+
+            self.process_success_label.config(text="เก็บข้อมูลสำเร็จ",font=("Helvetica", 16),fg= "green")
+        except :
+            self.process_success_label.config(text="มีบางอย่างผิดพลาด",font=("Helvetica", 16),fg= "red")
+
+        self.process_success_label.after(5000, lambda: self.process_success_label.config(text=""))  # Schedule label removal after 5000 milliseconds (5 seconds)
         #rint(len(self.intensity_list))
         #print(self.intensity_list)
 
     def press_servo(self):
         self.intensity_list.clear()
-        self.record_status_on_change()
+        self.record_status = not self.record_status
+        self.start_button.config(state=tk.DISABLED)
 
         # Comment if run on PC
         # self.pi.set_servo_pulsewidth(17,1000)
         
         # self.after(5000, lambda : self.pi.set_servo_pulsewidth(17,1900))
         self.after(10000, self.record_status_on_change)
+        self.start_button.after(10000, lambda: self.start_button.config(state=tk.NORMAL))
+        # self.after(10000, self.record_status_on_change)
     
 
     def navigate_to_view(self):
