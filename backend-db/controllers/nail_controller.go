@@ -43,6 +43,7 @@ func CreateNail(c *gin.Context) {
 		PatientID:      nail.PatientID,
 		PatientName:    nail.PatientName,
 		PatientSurname: nail.PatientSurname,
+		Age:            nail.Age,
 		Date:           time.Now(),
 		Data:           nail.Data,
 	}

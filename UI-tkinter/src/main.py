@@ -43,7 +43,13 @@ class App(tk.Tk):
 	def show_frame(self, cont):
 		frame = self.frames[cont]
 		frame.on_enter()
+
 		frame.tkraise()
+
+		# Call on_leave method for other frames to stop their animations
+		for f in self.frames.values():
+			if f != frame:
+				f.on_leave()
 
 	def get_page(self, classname):
 		'''Returns an instance of a page given it's class name as a string'''

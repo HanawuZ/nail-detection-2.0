@@ -36,14 +36,14 @@ class ViewAndSavePatient(tk.Frame):
         style = ttk.Style()
         style.configure(".", font=("Helvetica", 16))
 
-        self.col1 = tk.Frame(self,borderwidth=1, relief="solid")
-        self.col1.pack(side=tk.LEFT, fill=tk.BOTH,expand=True,anchor=tk.CENTER,)
+        self.col1 = tk.Frame(self,)
+        self.col1.pack(side=tk.LEFT, fill=tk.BOTH,expand=True,anchor=tk.CENTER, padx=(10,10))
         self.col1.grid_propagate(0)
         self.col1.grid_rowconfigure(0, weight=0)
         self.col1.grid_columnconfigure(0, weight=1)
         
         # Place your content in the left column
-        container = tk.Frame(self.col1, borderwidth=1, relief="solid")
+        container = tk.Frame(self.col1, )
         container.grid(row=0, column=0,pady=(100,30))
 
         tk.Label(container, text="ข้อมูลผู้ป่วย", font=("Helvetica", 26)).pack(anchor="w", padx=(0,0))
@@ -81,6 +81,14 @@ class ViewAndSavePatient(tk.Frame):
         self.lastname_entry = ttk.Entry(self.lastname_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
         self.lastname_entry.pack(anchor="w", padx=(20,0), ipady=5)
 
+        self.age_frame = tk.Frame(container)
+        self.age_frame.pack(anchor="w", padx=(0,0), fill="x")
+
+        age_label = tk.Label(self.age_frame, text="อายุ", font=("Helvetica", 18))
+        age_label.pack(anchor="w", padx=(15,0))
+
+        self.age_entry = ttk.Entry(self.age_frame, bootstyle="primary", width=55, font=("Helvetica", 16))
+        self.age_entry.pack(anchor="w", padx=(20,0), ipady=5)
 
         # tk.Label(patient_data_container,borderwidth=1, text="ข้อมูลผู้ป่วย",
         #          relief="solid", font=("Helvetica", 26)).grid(row=1,pady=(100,0), sticky="w")
@@ -162,28 +170,24 @@ class ViewAndSavePatient(tk.Frame):
         self.graph_label = tk.Label(self.col2, font=("Helvetica", 26))
         self.graph_label.grid(row=2)
         
-        # # Define a text to show that x axis is Time(in second)
-        # x_label = tk.Label(col2, text="Time(s)", font=("Helvetica", 18))
-        # x_label.grid(row=3)
-
         # Add row section for start button & create patient data button
         button_row = tk.Frame(self.col2)
         button_row.grid(row=4, pady=(30,0))
 
         self.replay_btn = ttk.Button(button_row,
                                 bootstyle="outline",
-                                text="Replay", 
+                                text="Play", 
                                 command=self.replay_graph,
                                 width=12)
         self.replay_btn.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
 
-        self.clear_btn = ttk.Button(button_row,
-                                bootstyle="danger",
-                                text="Clear Data", 
-                                # command=self.replay_graph,
-                                width=12)
-        self.clear_btn.pack(padx=10, pady=0, anchor=tk.CENTER, ipadx=15, ipady=15)
-        self.clear_btn.config(state=tk.DISABLED)
+        # self.clear_btn = ttk.Button(button_row,
+        #                         bootstyle="danger",
+        #                         text="Clear Data", 
+        #                         # command=self.replay_graph,
+        #                         width=12)
+        # self.clear_btn.pack(padx=10, pady=0, anchor=tk.CENTER, ipadx=15, ipady=15)
+        # self.clear_btn.config(state=tk.DISABLED)
 
         if not self.data:
             self.replay_btn.config(state=tk.DISABLED)
@@ -211,43 +215,72 @@ class ViewAndSavePatient(tk.Frame):
             self.graph_label.config(text="")
             self.replay_btn.config(state=tk.NORMAL)
 
-
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.graph_row)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(anchor=tk.CENTER, fill=tk.BOTH)
-        self.anim = animation.FuncAnimation(self.fig, self.animate, interval=100)
-    
+        # self.anim = animation.FuncAnimation(self.fig, self.animate, interval=50)
+
+    def on_leave(self):
+        if self.canvas:
+            self.canvas.get_tk_widget().destroy()  # Destroy the canvas widget
+
     def replay_graph(self):
         self.y.clear()
         self.canvas.get_tk_widget().destroy()  # Destroy the canvas widget
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.graph_row)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(anchor=tk.CENTER, fill=tk.BOTH)
-        self.anim = animation.FuncAnimation(self.fig, self.animate, interval=100)
+        self.anim = animation.FuncAnimation(self.fig, self.animate, interval=50)
         
-
+    def validate_age(self,age):
+        try:
+            age = int(age)  # Convert to integer
+            if age > 0:
+                return True
+            else:
+                return False
+        except ValueError:
+            return False
+    
     def insert_patient_data(self):
 
         patient_data = {
             "pid" : str(self.patient_id_entry.get()),
             "pname" : str(self.firstname_entry.get()),
             "psurname" : str(self.lastname_entry.get()),
+            "age" : str(self.age_entry.get()),
             "data": self.controller.patient.data,
         }
         pprint(patient_data)
 
-        if not patient_data["pid"] or not patient_data["pname"] or not patient_data["psurname"]:
+        ########### Validation #########################################
+        # All attribute value must not null, empty or None
+        if not patient_data["pid"] or not patient_data["pname"] or not patient_data["psurname"] or not patient_data["age"]:
             self.status_label.config(text="กรุณากรอกข้อมูลให้ครบถ้วน",font=("Helvetica", 16),fg= "red")
-            
+        
+        # attribute `data` must not empty
         elif not patient_data["data"] :
             self.status_label.config(text="กรุณาเก็บข้อมูลการตรวจจับก่อน",font=("Helvetica", 16),fg= "red")
-        
+
+        # attribute `age` must be postive number or zero only
+        elif not self.validate_age(patient_data["age"]):
+            self.status_label.config(text="อายุต้องเป็นตัวเลขเท่านั้น",font=("Helvetica", 16),fg= "red")
+
         else :
             try :
+                patient_data["age"] = int(patient_data["age"])
                 json_data = json.dumps(patient_data, indent = 4) 
                 response = requests.post('http://localhost:8080/nail', data=json_data)
+                if response.status_code in [200,201]:
+                    self.status_label.config(text="บันทึกข้อมูลสำเร็จ",font=("Helvetica", 16),fg= "green")
+                    self.status_label.after(3000, lambda : self.status_label.config(text=""))
+                else :
+                    self.status_label.config(text="ไม่สามารถเพิ่มข้อมูลได้ มีบางอย่างผิดพลาด",font=("Helvetica", 16),fg= "red")
+                    self.status_label.after(3000, lambda : self.status_label.config(text=""))
                 print(response)
             except:
+                self.status_label.config(text="มีบางอย่างผิดพลาด!!",font=("Helvetica", 16),fg= "red")
+                self.status_label.after(3000, lambda : self.status_label.config(text=""))
                 print("Error, please try again!!")
 
 

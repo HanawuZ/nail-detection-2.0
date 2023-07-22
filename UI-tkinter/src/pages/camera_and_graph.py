@@ -10,7 +10,6 @@ from matplotlib import style
 import matplotlib.animation as animation
 import numpy as np
 import multiprocessing as mp
-from .add_patient import AddPatient
 style.use("ggplot")
 PRIMARY_COLOR = "#C1C1C1"
 # subprocess.run(["python"])
@@ -52,8 +51,10 @@ class CameraAndGraph(tk.Frame):
 
         # Initialize attribute value
         # Define record status to determine that device is recording or not, default value is False
+        # True is video is recording
         self.record_status = False
         self.patient = self.controller.patient
+
         # Define 2 arrays
         # x is int array to store frame values
         # y float array to store intensity of nail
@@ -74,7 +75,7 @@ class CameraAndGraph(tk.Frame):
         self.style.configure(".", font=("Helvetica", 20))
 
         
-        camera_col = tk.Frame(self,width=650,height=720,borderwidth=1, relief="solid")
+        camera_col = tk.Frame(self,width=650,height=720,)
         camera_col.pack(side=tk.LEFT)
         camera_col.grid_propagate(0)
         
@@ -104,20 +105,6 @@ class CameraAndGraph(tk.Frame):
                                        width=12)
 
         self.start_button.pack(padx=10, pady=0, side=tk.LEFT, anchor=tk.CENTER, ipadx=15, ipady=15)
-        
-        ########## These're component for graph and button section ####################
-        # Define second column for display graph and button
-
-        # self.tab_control = ttk.Notebook(self)
-
-        # tab1 = ttk.Frame(self.tab_control)
-        # tab2 = AddPatient(self.tab_control,controller)
-
-        # self.tab_control.add(tab1, text ="Home")
-        # self.tab_control.pack(expand = 1, fill ="both")
-        # self.tab_control.add(tab2, text ="กรอกข้อมูลผู้ป่วย")
-        # self.tab_control.pack(expand = 1, fill ="both")
-
 
         col2 = tk.Frame(self,width=630,height=720)
         col2.pack(anchor=tk.CENTER)
@@ -153,18 +140,16 @@ class CameraAndGraph(tk.Frame):
         button_row = tk.Frame(col2)
         button_row.grid(row=4, pady=(20,0))
 
-        save_patient_btn = ttk.Button(button_row,
+        self.save_patient_btn = ttk.Button(button_row,
                                       bootstyle="success-outline",
                                       text="บันทึกข้อมูลผู้ป่วย", 
                                       command=self.navigate_to_view,
                                       width=12)
     
-        save_patient_btn.pack(padx=10, pady=0, side=tk.RIGHT, anchor=tk.CENTER, ipadx=15, ipady=15)
+        self.save_patient_btn.pack(padx=10, pady=0, side=tk.RIGHT, anchor=tk.CENTER, ipadx=15, ipady=15)
         
         self.show_camera()
     
-    def update_data(self,data):
-        self.controller.patient.set_patient_data(data["patient_id"], data["firstname"],data["lastname"])
         
     def animate(self, i):
         # update the data for the plot
@@ -185,10 +170,9 @@ class CameraAndGraph(tk.Frame):
 
             gray_frame = cv2.cvtColor(cv2image, cv2.COLOR_BGR2GRAY)
             contrast_frame = cv2.convertScaleAbs(gray_frame, alpha=3.0, beta=-300)      
-            cv2image = contrast_frame
+            # cv2image = contrast_frame
             in_roi_frame = contrast_frame[300:351, 250:281]
             
-                
             if self.record_status:
                 # self.video_recorder.write(self.frame)
                 cv2.putText(cv2image, "Running",(30,30), cv2.FONT_HERSHEY_DUPLEX, 1.0, [255, 0, 0],2)
@@ -233,27 +217,36 @@ class CameraAndGraph(tk.Frame):
         try :
             self.record_status = not self.record_status
             self.patient.set_intensity(self.intensity_list)
-
             self.process_success_label.config(text="เก็บข้อมูลสำเร็จ",font=("Helvetica", 16),fg= "green")
+            self.start_button.config(state=tk.NORMAL)
+            self.save_patient_btn.config(state=tk.NORMAL)
+
         except :
+            self.record_status = False
+            self.intensity_list.clear()
             self.process_success_label.config(text="มีบางอย่างผิดพลาด",font=("Helvetica", 16),fg= "red")
 
-        self.process_success_label.after(5000, lambda: self.process_success_label.config(text=""))  # Schedule label removal after 5000 milliseconds (5 seconds)
-        #rint(len(self.intensity_list))
-        #print(self.intensity_list)
+        self.after(2500, lambda : self.process_success_label.config(text="",font=("Helvetica", 16)))
+
+
+    def release_servo(self):
+        # self.pi.set_servo_pulsewidth(17,1900)
+        self.process_success_label.config(text="กรุณารออีก 5 วินาที",font=("Helvetica", 16),)
+        self.after(5000, self.record_status_on_change)
+
 
     def press_servo(self):
+        # Clear intensity list
         self.intensity_list.clear()
         self.record_status = not self.record_status
         self.start_button.config(state=tk.DISABLED)
-
-        # Comment if run on PC
+        self.save_patient_btn.config(state=tk.DISABLED)
+        
+        # Press servo for 5 seconds
         # self.pi.set_servo_pulsewidth(17,1000)
         
-        # self.after(5000, lambda : self.pi.set_servo_pulsewidth(17,1900))
-        self.after(10000, self.record_status_on_change)
-        self.start_button.after(10000, lambda: self.start_button.config(state=tk.NORMAL))
-        # self.after(10000, self.record_status_on_change)
+        # Wait for 5 seconds and release servo.
+        self.after(5000, self.release_servo)
     
 
     def navigate_to_view(self):
