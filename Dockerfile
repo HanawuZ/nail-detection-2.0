@@ -1,13 +1,17 @@
-# version of python
-FROM python:3.9.12-alpine
+# Use the official Go image
+FROM golang:1.9
 
-COPY /UI-tinker/src/ /app/
-# Download Package 
-RUN apt-get update -y
+# Set the working directory inside the container
+WORKDIR /app
 
-# install Dependencies
-RUN apt-get install tk -y
+# Copy the Go project files into the container
+COPY . .
 
-# Command to run Tkinter application
-CMD [ "/" ]
+# Build the Go project
+RUN go build -o main .
 
+# Expose the port your Go Gin application is using
+EXPOSE 8080
+
+# Command to run your application
+CMD ["./main"]
