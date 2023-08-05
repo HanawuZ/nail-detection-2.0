@@ -9,6 +9,8 @@ WORKDIR /app
 COPY /backend-db/. .   
 
 # Build the Go project
+RUN go mod tidy
+RUN go mod verify
 RUN go build -o main .
 
 # Expose the port your Go Gin application is using
