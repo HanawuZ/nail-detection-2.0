@@ -1,12 +1,17 @@
 # Use the official Go image
-FROM golang:1.9
+FROM golang:1.x
 
 # Set the working directory inside the container
 WORKDIR /app
 
+COPY /backend-db/. .   
+
+# Set environment variable to enable Go modules
+ENV GO111MODULE=on
+
 # Copy the Go project files into the container
 # This will copy all files and directories inside backend-db
-COPY /backend-db/. .   
+
 
 # Build the Go project
 RUN go mod tidy
