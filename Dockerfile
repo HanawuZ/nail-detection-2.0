@@ -9,7 +9,7 @@ WORKDIR /app
 COPY backend-db/ .   
 
 # Build the Go project
-RUN go build -o main .
+RUN go build -o ./backend-db
 
 # Expose the port your Go Gin application is using
 EXPOSE 8080
