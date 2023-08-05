@@ -6,10 +6,10 @@ WORKDIR /app
 
 # Copy the Go project files into the container
 # This will copy all files and directories inside backend-db
-COPY backend-db/ .   
+COPY /backend-db/. .   
 
 # Build the Go project
-RUN go build -o ./backend-db
+RUN go build -o main .
 
 # Expose the port your Go Gin application is using
 EXPOSE 8080
