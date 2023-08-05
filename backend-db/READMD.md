@@ -27,3 +27,7 @@
 3. run `docker compose up -d`
 
 4. start write code with mongodb
+
+## Build and Deploy
+1. Following this link
+https://medium.com/@vngauv/from-github-to-gce-automate-deployment-with-github-actions-27e89ba6add8
