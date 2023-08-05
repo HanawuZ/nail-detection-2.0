@@ -2,4 +2,4 @@
 
 .env
 
-go.sum
+# go.sum
