@@ -5,8 +5,8 @@ FROM golang:1.9
 WORKDIR /app
 
 # Copy the Go project files into the container
-COPY backend-db/go.mod /.
-COPY backend-db/go.sum /.
+# This will copy all files and directories inside backend-db
+COPY backend-db/ .   
 
 # Build the Go project
 RUN go build -o main .
