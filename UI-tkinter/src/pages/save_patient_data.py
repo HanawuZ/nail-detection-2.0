@@ -270,7 +270,7 @@ class ViewAndSavePatient(tk.Frame):
             try :
                 patient_data["age"] = int(patient_data["age"])
                 json_data = json.dumps(patient_data, indent = 4) 
-                response = requests.post('http://localhost:8080/nail', data=json_data)
+                response = requests.post('https://nail-detection-be-f7kbqf4d5q-as.a.run.app/nail', data=json_data)
                 if response.status_code in [200,201]:
                     self.status_label.config(text="บันทึกข้อมูลสำเร็จ",font=("Helvetica", 16),fg= "green")
                     self.status_label.after(3000, lambda : self.status_label.config(text=""))
